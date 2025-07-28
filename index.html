@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>GoodReads Trends Narrative Visualization</title>
+
+  <link rel="stylesheet" href="goodreads_trends.css" />
+
+  <script src="https://d3js.org/d3.v7.min.js"></script>
+</head>
+<body>
+
+  <header>
+    <h1>GoodReads Trends Narrative Visualization</h1>
+    <p>Explore book reviews, likes, and covers!</p>
+  </header>
+
+  <main id="vis-container">
+
+  </main>
+
+
+  <script>
+    d3.csv("Book_Details.csv").then(data => {
+      const container = d3.select("#vis-container");
+
+      container.selectAll(".book-card")
+        .data(data)
+        .enter()
+        .append("div")
+        .attr("class", "book-card")
+        .html(d => `
+          <img src="${d.cover_image_uri}" alt="Book cover" class="book-cover" />
+          <div class="book-title">${d.book_title || 'No title'}</div>
+          <div class="book-author">${d.author || 'Unknown author'}</div>
+          //<div class="like-count">${d.likes_on_review || 0} likes</div>
+          //<div class="review-content">${d.review_content || ''}</div>
+        `);
+    });
+  </script>
+
+</body>
+</html>
