@@ -5,6 +5,33 @@ body {
   margin: 20px;
 }
 
+.tab-container {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.tab-button {
+  padding: 10px 20px;
+  cursor: pointer;
+  border: none;
+  background: #ccc;
+  border-radius: 5px;
+}
+
+.tab-button.active {
+  background: #333;
+  color: #fff;
+}
+
+.tab-content {
+  display: block;
+}
+
+.tab-content.hidden {
+  display: none;
+}
+
 .book-card {
   background-color: white;
   border: 1px solid #ddd;
@@ -44,3 +71,4 @@ body {
   font-size: 13px;
   color: #999;
 }
+
