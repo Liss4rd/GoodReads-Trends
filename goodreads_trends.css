@@ -1,8 +1,8 @@
 body {
   font-family: Arial, sans-serif;
-  background-color: #FAFAFA;
-  color: #333;
-  margin: 20px;
+  margin: 2rem;
+  background: #FAF9F6;
+  color: #222;
 }
 
 .tab-container {
