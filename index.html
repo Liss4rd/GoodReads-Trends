@@ -16,24 +16,28 @@
     <p>Explore book reviews, likes, and covers!</p>
   </header>
 
-  <main id="vis-container">
+  <div class="tab-container">
+    <button class="tab-button active" data-tab="scene1">Scene 1</button>
+    <button class="tab-button" data-tab="scene2">Scene 2</button>
+    <button class="tab-button" data-tab="scene3">Scene 3</button>
+  </div>
 
-    <div class="tab-container">
-    <button class="tab-button active" data-tab="scene1">Genre Trends</button>
-    <button class="tab-button" data-tab="scene2">Top Genres per Year</button>
-    <button class="tab-button" data-tab="scene3">Drill Down by Genre</button>
-    </div>
+  <div id="scene1" class="tab-content">
+    <h2>Scene 1: Genre Timeline</h2>
+    <div id="chart1"></div>
+  </div>
 
-    <div class="tab-content" id="scene1"></div>
-    <div class="tab-content hidden" id="scene2"></div>
-    <div class="tab-content hidden" id="scene3"></div>
-    
-  </main>
+  <div id="scene2" class="tab-content hidden">
+    <h2>Scene 2: Top Genres per Year</h2>
+    <div id="chart2"></div>
+  </div>
+
+  <div id="scene3" class="tab-content hidden">
+    <h2>Scene 3: Drilldown</h2>
+    <div id="chart3"></div>
+  </div>
 
   <script src="https://d3js.org/d3.v7.min.js"></script>
-  <script src="goodreads_scenes.js">
-    
-  </script>
-
+  <script src="goodreads_scenes.js" defer></script>
 </body>
 </html>
