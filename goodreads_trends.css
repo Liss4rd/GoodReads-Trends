@@ -1,0 +1,46 @@
+body {
+  font-family: Arial, sans-serif;
+  background-color: #FAFAFA;
+  color: #333;
+  margin: 20px;
+}
+
+.book-card {
+  background-color: white;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  padding: 15px;
+  margin: 10px;
+  width: 200px;
+  display: inline-block;
+  vertical-align: top;
+  text-align: center;
+}
+
+.book-cover {
+  width: 128px;
+  height: auto;
+  margin-bottom: 10px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+  border-radius: 4px;
+}
+
+.book-title {
+  font-family: Georgia, serif;
+  font-size: 16px;
+  margin: 5px 0;
+  color: #2a475e;
+  font-weight: bold;
+}
+
+.book-author {
+  font-size: 14px;
+  color: #666;
+  margin-bottom: 10px;
+}
+
+.like-count {
+  font-size: 13px;
+  color: #999;
+}
