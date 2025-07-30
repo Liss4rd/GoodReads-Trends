@@ -60,10 +60,10 @@ function Scene1() {
       });
     });
 
-    // Top 15 genres
+    // Top 5 genres
     const topGenres = Object.entries(genreTotalCounts)
       .sort((a, b) => b[1] - a[1])
-      .slice(0, 15)
+      .slice(0, 5)
       .map(d => d[0]);
 
     const allYears = Array.from(
