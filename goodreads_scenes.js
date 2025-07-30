@@ -86,11 +86,11 @@ function Scene1() {
 
 function drawGenreTrendsTimeline(data, keys) {
   d3.select("#chart1").html("");
-
-  const container = document.querySelector("#chart1");
-  const containerWidth = container.clientWidth || 1000;
-  const containerHeight = window.innerHeight * 0.6; 
   
+  const container = document.querySelector("#chart1");
+  const containerWidth = container.clientWidth || window.innerWidth * 0.9;
+  const containerHeight = window.innerHeight * 0.6;
+
   const margin = { top: 40, right: 150, bottom: 50, left: 60 },
       width = containerWidth - margin.left - margin.right,
       height = containerHeight - margin.top - margin.bottom;
