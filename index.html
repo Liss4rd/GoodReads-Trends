@@ -22,17 +22,25 @@
     <button class="tab-button" data-tab="scene3">Genre Inspection</button>
   </div>
 
-  <div id="scene1-controls" style="margin-bottom: 1em;">
-  <label>Year Range:</label>
-  <input type="range" id="year-min" min="1900" max="2025" value="2000">
-  <span id="year-min-label">2000</span>
-  <input type="range" id="year-max" min="1900" max="2025" value="2020">
-  <span id="year-max-label">2020</span>
-
-  <label style="margin-left: 20px;">Genres:</label>
-  <select id="genre-select" multiple size="5" style="vertical-align: middle;">
-  </select>
+ <div id="scene1-controls" style="margin-bottom: 1em; display: flex; flex-wrap: wrap; gap: 20px; align-items: center;">
+  
+  <div style="flex: 1; min-width: 300px;">
+    <label>Publication Year Range:</label>
+    <div id="year-range-slider" style="position: relative; height: 40px;">
+      <input type="range" id="year-start" min="1900" max="2025" step="1">
+      <input type="range" id="year-end" min="1900" max="2025" step="1">
+      <div id="year-range-labels" style="margin-top: 5px; font-size: 0.9em;">
+        <span id="year-start-label"></span> – <span id="year-end-label"></span>
+      </div>
+    </div>
   </div>
+
+  <div style="flex: 0 0 250px;">
+    <label>Genres:</label>
+    <select id="genre-select" multiple size="8" style="width: 100%; padding: 4px; font-size: 0.9em; border-radius: 6px; border: 1px solid #ccc;">
+    </select>
+  </div>
+</div>
   
   <div id="scene1" class="tab-content">
     <h2>Scene 1: Genre Timeline</h2>
