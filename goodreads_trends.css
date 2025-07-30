@@ -55,3 +55,9 @@ h2 {
   margin-bottom: 1rem;
   color: #444;
 }
+
+.label {
+  font-size: 14px;
+  font-weight: bold;
+  fill: #333; /* dark text */
+}
