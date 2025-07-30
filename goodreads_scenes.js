@@ -19,11 +19,10 @@ window.addEventListener("DOMContentLoaded", () => {
     });
   });
 
-  // Load initial scene
   Scene1();
 });
 
-// Publication info func
+// Extract year from publication_info
 function extractYear(pubInfo) {
   const match = pubInfo?.match(/(\d{4})/);
   return match ? parseInt(match[1]) : null;
@@ -33,82 +32,60 @@ function extractYear(pubInfo) {
 function Scene1() {
   console.log("Scene 1: Genre Trends Timeline");
 
- d3.csv("Book_Details.csv").then(data => {
-  const genreYearCounts = {};
-  const genreTotalCounts = {};
+  d3.csv("Book_Details.csv").then(data => {
+    const genreYearCounts = {};
+    const genreTotalCounts = {};
 
-  data.forEach(row => {
-    const year = extractYear(row.publication_info);
-    if (!year) console.warn("Missing year for row:", row);
+    data.forEach(row => {
+      const year = extractYear(row.publication_info);
+      if (!year) return;
 
-    let genres = [];
-    if (row.genres) {
-      genres = row.genres
-        .replace(/[\[\]']+/g, "")  
-        .split(",")
-        .map(g => g.trim())
-        .filter(g => g.length > 0);
-    }
+      let genres = [];
+      if (row.genres) {
+        genres = row.genres
+          .replace(/[\[\]']+/g, "")  
+          .split(",")
+          .map(g => g.trim())
+          .filter(g => g.length > 0);
+      }
 
-    if (!year || genres.length === 0) return;
+      if (!year || genres.length === 0) return;
 
-    // Count genres per year
-    genres.forEach(genre => {
-      if (!genreYearCounts[genre]) genreYearCounts[genre] = {};
-      if (!genreYearCounts[genre][year]) genreYearCounts[genre][year] = 0;
-      genreYearCounts[genre][year] += 1;
+      genres.forEach(genre => {
+        if (!genreYearCounts[genre]) genreYearCounts[genre] = {};
+        if (!genreYearCounts[genre][year]) genreYearCounts[genre][year] = 0;
+        genreYearCounts[genre][year] += 1;
 
-      // Count total genre mentions
-      genreTotalCounts[genre] = (genreTotalCounts[genre] || 0) + 1;
+        genreTotalCounts[genre] = (genreTotalCounts[genre] || 0) + 1;
+      });
     });
-  });
 
-  // Sort genres by total count descending and take top 15
-  const topGenres = Object.entries(genreTotalCounts)
-    .sort((a, b) => b[1] - a[1])
-    .slice(0, 15)
-    .map(d => d[0]);
+    // Top 15 genres
+    const topGenres = Object.entries(genreTotalCounts)
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 15)
+      .map(d => d[0]);
 
-  console.log("Top 15 genres:", topGenres);
+    const allYears = Array.from(
+      new Set(Object.values(genreYearCounts).flatMap(yearsObj => Object.keys(yearsObj).map(Number)))
+    ).sort((a, b) => a - b);
 
-  const allYears = Array.from(
-    new Set(Object.values(genreYearCounts).flatMap(yearsObj => Object.keys(yearsObj).map(Number)))
-  ).sort((a, b) => a - b);
-
-  // Prepare data for top genres only
-  const stackedData = allYears.map(year => {
-    const entry = { year };
-    topGenres.forEach(genre => {
-      entry[genre] = genreYearCounts[genre]?.[year] || 0;
+    const stackedData = allYears.map(year => {
+      const entry = { year };
+      topGenres.forEach(genre => {
+        entry[genre] = genreYearCounts[genre]?.[year] || 0;
+      });
+      return entry;
     });
-    return entry;
+
+    const filteredData = stackedData.filter(d => d.year >= 2000 && d.year <= 2020);
+
+    drawGenreTrendsTimeline(filteredData, topGenres);
   });
-
-  const filteredData = stackedData.filter(d => d.year >= 2000 && d.year <= 2020);
-
-  drawGenreTrendsTimeline(filteredData, topGenres);
-
-   // X Axis Label
-  svg.append("text")
-    .attr("class", "x label")
-    .attr("text-anchor", "middle")
-    .attr("x", (width - margin.left - margin.right) / 2 + margin.left)
-    .attr("y", height - 5) 
-    .text("Publishing Year");
-
-  // Y Axis Label
-  svg.append("text")
-    .attr("class", "y label")
-    .attr("text-anchor", "middle")
-    .attr("transform", "rotate(-90)")
-    .attr("x", - (height - margin.top - margin.bottom) / 2 - margin.top)
-    .attr("y", 15) 
-    .text("Number of Books");
-});
 }
 
 function drawGenreTrendsTimeline(data, keys) {
-  d3.select("#chart1").html(""); //
+  d3.select("#chart1").html("");
 
   const margin = { top: 40, right: 150, bottom: 50, left: 60 },
         width = 800 - margin.left - margin.right,
@@ -126,26 +103,20 @@ function drawGenreTrendsTimeline(data, keys) {
     .range([0, width]);
 
   const maxY = d3.max(data, d => d3.max(keys, k => d[k]));
-  console.log("Max Y (count):", maxY);
-
   const y = d3.scaleLinear()
     .domain([0, maxY])
     .nice()
     .range([height, 0]);
 
   const color = d3.scaleOrdinal(d3.schemeCategory10).domain(keys);
-
   const line = d3.line()
     .defined(d => d.value !== 0)
     .x(d => x(d.year))
     .y(d => y(d.value));
 
-  // Just plot top 3 genres for testing
-  const topKeys = keys.slice(0, 3);
-
-  topKeys.forEach(key => {
+  // Draw lines for top genres
+  keys.forEach(key => {
     const lineData = data.map(d => ({ year: d.year, value: d[key] || 0 }));
-    console.log(`Drawing line for ${key}:`, lineData);
     g.append("path")
       .datum(lineData)
       .attr("fill", "none")
@@ -154,17 +125,36 @@ function drawGenreTrendsTimeline(data, keys) {
       .attr("d", line);
   });
 
+  // Axes
   g.append("g")
     .attr("transform", `translate(0,${height})`)
     .call(d3.axisBottom(x).tickFormat(d3.format("d")));
 
-  g.append("g").call(d3.axisLeft(y));
+  g.append("g")
+    .call(d3.axisLeft(y));
+
+  // X axis label
+  svg.append("text")
+    .attr("class", "x label")
+    .attr("text-anchor", "middle")
+    .attr("x", (width + margin.left + margin.right) / 2)
+    .attr("y", height + margin.top + 35)
+    .text("Publishing Year");
+
+  // Y axis label
+  svg.append("text")
+    .attr("class", "y label")
+    .attr("text-anchor", "middle")
+    .attr("transform", "rotate(-90)")
+    .attr("x", - (height / 2) - margin.top)
+    .attr("y", 15)
+    .text("Number of Books");
 
   // Legend
   const legend = svg.append("g")
     .attr("transform", `translate(${width + margin.left + 10},${margin.top})`);
 
-  topKeys.forEach((key, i) => {
+  keys.forEach((key, i) => {
     const row = legend.append("g").attr("transform", `translate(0, ${i * 20})`);
     row.append("rect").attr("width", 12).attr("height", 12).attr("fill", color(key));
     row.append("text").attr("x", 16).attr("y", 10).text(key).style("font-size", "12px");
@@ -243,7 +233,6 @@ function drawTopGenrePerYear(data) {
   const color = d3.scaleOrdinal(d3.schemeSet2);
 
   g.append("g").call(d3.axisLeft(y).tickFormat(d3.format("d")));
-
   g.append("g")
     .attr("transform", `translate(0, ${height})`)
     .call(d3.axisBottom(x));
@@ -258,7 +247,6 @@ function drawTopGenrePerYear(data) {
     .attr("width", d => x(d.avgRating))
     .attr("fill", d => color(d.genre));
 
-  // Add labels
   g.selectAll(".label")
     .data(data)
     .enter()
@@ -273,5 +261,4 @@ function drawTopGenrePerYear(data) {
 // SCENE 3
 function Scene3() {
   console.log("Scene 3: Drilldown by Genre");
-
 }
