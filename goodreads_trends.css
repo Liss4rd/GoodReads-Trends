@@ -74,62 +74,76 @@ h2 {
 /* Dual Range Slider Styles */
 .range-slider {
   position: relative;
-  width: 400px;                 
-  height: 30px;                 
+  width: 400px;
+  height: 40px;
   margin: 20px 0;
 }
 
 .range-slider input[type=range] {
-  pointer-events: none;        
   -webkit-appearance: none;
   appearance: none;
   position: absolute;
   left: 0;
-  top: 50%;                  
+  top: 50%;
   transform: translateY(-50%);
   width: 100%;
-  height: 5px;                 
-  background: #CCC;        
-  border-radius: 5px;
+  height: 6px;
+  background: transparent; 
+  border-radius: 3px;
   outline: none;
-  margin: 0;
+  pointer-events: none; /
 }
 
+/* Thumbs always on top and visible */
 .range-slider input[type=range]::-webkit-slider-thumb {
-  pointer-events: all;         
-  position: relative;        
-  z-index: 1;
   -webkit-appearance: none;
-  width: 16px;
-  height: 16px;
+  width: 18px;
+  height: 18px;
   background: #fff;
-  border: 2px solid #555;
+  border: 2px solid #007bff;
   border-radius: 50%;
   cursor: pointer;
-}
-.range-slider input[type=range]::-moz-range-thumb {
   pointer-events: all;
   position: relative;
-  z-index: 1;
-  width: 16px;
-  height: 16px;
+  z-index: 10;
+}
+.range-slider input[type=range]::-moz-range-thumb {
+  width: 18px;
+  height: 18px;
   background: #fff;
-  border: 2px solid #555;
+  border: 2px solid #007bff;
   border-radius: 50%;
   cursor: pointer;
+  pointer-events: all;
+  position: relative;
+  z-index: 10;
 }
 
+/* Track style fallback for browsers without JS gradient */
+.range-slider input[type=range]::-webkit-slider-runnable-track {
+  height: 6px;
+  background: #ccc;
+  border-radius: 3px;
+}
 .range-slider input[type=range]::-moz-range-track {
-  background: transparent;
+  height: 6px;
+  background: #ccc;
+  border-radius: 3px;
 }
 
-#fromSlider { z-index: 2; }
-#fromSlider::-webkit-slider-runnable-track { background: transparent; } 
-#toSlider { z-index: 1; }
+/* Make sure both handles stack correctly */
+#year-start { z-index: 3; }
+#year-end { z-index: 2; }
 
-/* =========================
-   Genre Search Chips
-   ========================= */
+.year-labels {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.85em;
+  margin-top: 4px;
+  color: #444;
+}
+
+/* Genre Search Chips */
 .genre-search {
   width: 250px;
   position: relative;
