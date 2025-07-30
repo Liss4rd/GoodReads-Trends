@@ -16,6 +16,24 @@ window.addEventListener("DOMContentLoaded", () => {
   startYearInput.value = minYear;
   endYearInput.value = maxYear;
 
+  function updateSliderFill() {
+    const start = parseInt(startYearInput.value);
+    const end = parseInt(endYearInput.value);
+    const range = maxYear - minYear;
+
+    const startPercent = ((start - minYear) / range) * 100;
+    const endPercent = ((end - minYear) / range) * 100;
+
+    const gradient = `linear-gradient(to right, 
+      #ccc ${startPercent}%, 
+      #4CAF50 ${startPercent}%, 
+      #4CAF50 ${endPercent}%, 
+      #ccc ${endPercent}%)`;
+
+    startYearInput.style.background = gradient;
+    endYearInput.style.background = gradient;
+  }
+
   function updateYearSlider() {
     let start = parseInt(startYearInput.value);
     let end = parseInt(endYearInput.value);
@@ -34,11 +52,16 @@ window.addEventListener("DOMContentLoaded", () => {
     yearStartLabel.textContent = start;
     yearEndLabel.textContent = end;
 
+    updateSliderFill();
     updateScene1();
   }
 
   startYearInput.addEventListener("input", updateYearSlider);
   endYearInput.addEventListener("input", updateYearSlider);
+
+  updateSliderFill();
+  yearStartLabel.textContent = startYearInput.value;
+  yearEndLabel.textContent = endYearInput.value;
 
   // Genre Search + Chips
   const genreInput = document.getElementById("genre-input");
@@ -246,7 +269,6 @@ window.addEventListener("DOMContentLoaded", () => {
 
   // Load scene
   Scene1();
-
 });
 
 // Scene 2 & 3 
