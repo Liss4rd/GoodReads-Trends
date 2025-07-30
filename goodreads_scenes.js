@@ -8,7 +8,7 @@
   let endYear = 2020;
 
   const width = 400;
-  const height = 60;
+  const height = 150;
 
   const svg = d3.select("#yearSlider")
     .attr("width", width + 100)
