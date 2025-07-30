@@ -5,6 +5,10 @@ body {
   color: #222;
 }
 
+header {
+  margin-bottom: 1.5rem;
+}
+
 .tab-container {
   display: flex;
   gap: 1rem;
@@ -17,6 +21,11 @@ body {
   border: none;
   background: #ccc;
   border-radius: 5px;
+  transition: background 0.3s ease;
+}
+
+.tab-button:hover {
+  background: #bbb;
 }
 
 .tab-button.active {
@@ -32,43 +41,17 @@ body {
   display: none;
 }
 
-.book-card {
-  background-color: white;
-  border: 1px solid #ddd;
+#chart1 svg,
+#chart2 svg,
+#chart3 svg {
+  background: #fff;
+  border: 1px solid #ccc;
   border-radius: 6px;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-  padding: 15px;
-  margin: 10px;
-  width: 200px;
-  display: inline-block;
-  vertical-align: top;
-  text-align: center;
+  font-family: Arial, sans-serif;
 }
 
-.book-cover {
-  width: 128px;
-  height: auto;
-  margin-bottom: 10px;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.2);
-  border-radius: 4px;
+h2 {
+  margin-top: 0;
+  margin-bottom: 1rem;
+  color: #444;
 }
-
-.book-title {
-  font-family: Georgia, serif;
-  font-size: 16px;
-  margin: 5px 0;
-  color: #2a475e;
-  font-weight: bold;
-}
-
-.book-author {
-  font-size: 14px;
-  color: #666;
-  margin-bottom: 10px;
-}
-
-.like-count {
-  font-size: 13px;
-  color: #999;
-}
-
