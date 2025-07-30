@@ -87,6 +87,23 @@ function Scene1() {
   const filteredData = stackedData.filter(d => d.year >= 2000 && d.year <= 2020);
 
   drawGenreTrendsTimeline(filteredData, topGenres);
+
+   // X Axis Label
+  svg.append("text")
+    .attr("class", "x label")
+    .attr("text-anchor", "middle")
+    .attr("x", (width - margin.left - margin.right) / 2 + margin.left)
+    .attr("y", height - 5) 
+    .text("Publishing Year");
+
+  // Y Axis Label
+  svg.append("text")
+    .attr("class", "y label")
+    .attr("text-anchor", "middle")
+    .attr("transform", "rotate(-90)")
+    .attr("x", - (height - margin.top - margin.bottom) / 2 - margin.top)
+    .attr("y", 15) 
+    .text("Number of Books");
 });
 }
 
