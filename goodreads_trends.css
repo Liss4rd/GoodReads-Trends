@@ -71,9 +71,7 @@ h2 {
   fill: #333;
 }
 
-/* =========================
-   Dual Range Slider Styles
-   ========================= */
+/* Dual Range Slider Styles */
 .range-slider {
   position: relative;
   width: 400px;                 
