@@ -23,24 +23,23 @@
 <!-- Scene 1 Controls -->
 <div id="scene1-controls">
 
-  <!-- Year Range Slider -->
+  <!-- Year Range -->
   <div class="range-slider">
-    <input id="year-start" type="range" min="2000" max="2025" value="2000" step="1">
-    <input id="year-end" type="range" min="2000" max="2025" value="2025" step="1">
+    <div class="slider-track"></div>
+    <input id="fromSlider" type="range" min="2000" max="2025" value="2000" step="1">
+    <input id="toSlider" type="range" min="2000" max="2025" value="2025" step="1">
   </div>
-  
-  <!-- Year labels under the slider -->
   <div class="year-labels">
-    <span id="year-start-label">2000</span>
-    <span id="year-end-label">2025</span>
+    <span id="yearStartLabel">2000</span>
+    <span id="yearEndLabel">2025</span>
   </div>
 
   <!-- Genre Search -->
   <div class="control-block">
     <label for="genre-search">Search & Select Genres:</label>
     <input type="text" id="genre-search" placeholder="Type to search genres..." />
-    <div id="genre-suggestions" class="genre-suggestions"></div>
-    <div id="selected-genres" class="selected-genres"></div>
+    <div id="genre-suggestions"></div>
+    <div id="selected-genres"></div>
   </div>
 
 </div>
@@ -51,11 +50,13 @@
   <div id="chart1"></div>
 </div>
 
+<!-- Scene 2 -->
 <div id="scene2" class="tab-content hidden">
   <h2>Scene 2: Top Genres per Year</h2>
   <div id="chart2"></div>
 </div>
 
+<!-- Scene 3 -->
 <div id="scene3" class="tab-content hidden">
   <h2>Scene 3: Genre Exploration</h2>
   <div id="chart3"></div>
