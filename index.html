@@ -6,7 +6,6 @@
   <title>GoodReads Trends Narrative Visualization</title>
 
   <link rel="stylesheet" href="goodreads_trends.css" />
-
   <script src="https://d3js.org/d3.v7.min.js"></script>
 </head>
 <body>
@@ -17,41 +16,44 @@
   </header>
 
   <div class="tab-container">
-    <button class="tab-button active" data-tab="scene1">Timelilne of Genre Trends</button>
+    <button class="tab-button active" data-tab="scene1">Timeline of Genre Trends</button>
     <button class="tab-button" data-tab="scene2">Highest Ranking Genre Per Year</button>
     <button class="tab-button" data-tab="scene3">Genre Inspection</button>
   </div>
 
-  <div id="scene1-controls" style="margin-bottom: 1em; display: flex; flex-wrap: wrap; gap: 20px; align-items: center;">
-  
-  <div style="flex: 1; min-width: 300px;">
-    <label>Publication Year Range:</label>
-    <div id="year-range-slider" style="position: relative; height: 40px;">
-      <input type="range" id="year-start" min="2000" max="2025" step="1">
-      <input type="range" id="year-end" min="2000" max="2025" step="1">
-      <div id="year-range-labels" style="margin-top: 5px; font-size: 0.9em;">
-        <span id="year-start-label"></span> – <span id="year-end-label"></span>
-      </div>
-    </div>
-  </div>
-
-  <div style="flex: 0 0 250px;">
-    <label>Genres:</label>
-    <select id="genre-select" multiple size="8" style="width: 100%; padding: 4px; font-size: 0.9em; border-radius: 6px; border: 1px solid #ccc;">
-    </select>
-  </div>
-</div>
-  
+  <!-- SCENE 1 -->
   <div id="scene1" class="tab-content">
     <h2>Scene 1: Genre Timeline</h2>
+
+    <div id="scene1-controls">
+      <!-- Year Range -->
+      <div class="range-container">
+        <label for="year-start">Publication Year Range:</label>
+        <input type="range" id="year-start" min="2000" max="2025" step="1">
+        <input type="range" id="year-end" min="2000" max="2025" step="1">
+        <div id="year-range-labels">
+          <span id="year-start-label">2000</span> – 
+          <span id="year-end-label">2025</span>
+        </div>
+      </div>
+
+      <!-- Genre Multi-Select -->
+      <div class="genre-container">
+        <label for="genre-select">Genres:</label>
+        <select id="genre-select" multiple size="8"></select>
+      </div>
+    </div>
+
     <div id="chart1"></div>
   </div>
 
+  <!-- SCENE 2 -->
   <div id="scene2" class="tab-content hidden">
     <h2>Scene 2: Top Genres per Year</h2>
     <div id="chart2"></div>
   </div>
 
+  <!-- SCENE 3 -->
   <div id="scene3" class="tab-content hidden">
     <h2>Scene 3: Genre Exploration</h2>
     <div id="chart3"></div>
