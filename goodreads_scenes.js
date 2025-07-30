@@ -33,43 +33,61 @@ function extractYear(pubInfo) {
 function Scene1() {
   console.log("Scene 1: Genre Trends Timeline");
 
-  d3.csv("Book_Details.csv").then(data => {
-    const genreYearCounts = {};
+ d3.csv("Book_Details.csv").then(data => {
+  const genreYearCounts = {};
+  const genreTotalCounts = {};
 
-    data.forEach(row => {
-      const year = extractYear(row.publication_info);
-      if (!year) console.warn("Missing year for row:", row);
-      const genres = row.genres ? row.genres.split(",").map(g => g.trim()) : [];
+  data.forEach(row => {
+    const year = extractYear(row.publication_info);
+    if (!year) console.warn("Missing year for row:", row);
 
-      if (!year || genres.length === 0) return;
+    let genres = [];
+    if (row.genres) {
+      genres = row.genres
+        .replace(/[\[\]']+/g, "")  
+        .split(",")
+        .map(g => g.trim())
+        .filter(g => g.length > 0);
+    }
 
-      genres.forEach(genre => {
-        if (!genreYearCounts[genre]) genreYearCounts[genre] = {};
-        if (!genreYearCounts[genre][year]) genreYearCounts[genre][year] = 0;
-        genreYearCounts[genre][year] += 1;
-      });
+    if (!year || genres.length === 0) return;
+
+    // Count genres per year
+    genres.forEach(genre => {
+      if (!genreYearCounts[genre]) genreYearCounts[genre] = {};
+      if (!genreYearCounts[genre][year]) genreYearCounts[genre][year] = 0;
+      genreYearCounts[genre][year] += 1;
+
+      // Count total genre mentions
+      genreTotalCounts[genre] = (genreTotalCounts[genre] || 0) + 1;
     });
-
-    const genreList = Object.keys(genreYearCounts);
-    console.log("Genres found:", genreList);
-
-    const allYears = Array.from(
-      new Set(Object.values(genreYearCounts).flatMap(yearsObj => Object.keys(yearsObj).map(Number)))
-    ).sort((a, b) => a - b);
-
-    const stackedData = allYears.map(year => {
-      const entry = { year };
-      genreList.forEach(genre => {
-        entry[genre] = genreYearCounts[genre][year] || 0;
-      });
-      return entry;
-    });
-
-    // Limit years to 2000-2020 for testing
-    const filteredData = stackedData.filter(d => d.year >= 2000 && d.year <= 2020);
-
-    drawGenreTrendsTimeline(filteredData, genreList);
   });
+
+  // Sort genres by total count descending and take top 15
+  const topGenres = Object.entries(genreTotalCounts)
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, 15)
+    .map(d => d[0]);
+
+  console.log("Top 15 genres:", topGenres);
+
+  const allYears = Array.from(
+    new Set(Object.values(genreYearCounts).flatMap(yearsObj => Object.keys(yearsObj).map(Number)))
+  ).sort((a, b) => a - b);
+
+  // Prepare data for top genres only
+  const stackedData = allYears.map(year => {
+    const entry = { year };
+    topGenres.forEach(genre => {
+      entry[genre] = genreYearCounts[genre]?.[year] || 0;
+    });
+    return entry;
+  });
+
+  const filteredData = stackedData.filter(d => d.year >= 2000 && d.year <= 2020);
+
+  drawGenreTrendsTimeline(filteredData, topGenres);
+});
 }
 
 function drawGenreTrendsTimeline(data, keys) {
