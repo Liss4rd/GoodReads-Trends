@@ -24,15 +24,13 @@
 <div id="scene1-controls">
 
   <!-- Year Range -->
-  <div class="control-block">
-    <label>Publication Year Range:</label>
-    <div id="year-slider-container">
-      <input type="range" id="year-start" min="2000" max="2025" value="2000" step="1">
-      <input type="range" id="year-end" min="2000" max="2025" value="2025" step="1">
-    </div>
-    <div class="year-labels">
-      <span id="year-start-label">2000</span> – <span id="year-end-label">2025</span>
-    </div>
+  <div class="range-slider">
+    <!-- Dual range inputs for the two slider thumbs -->
+    <input id="fromSlider" type="range" min="2000" max="2025" value="2000" step="1">
+    <input id="toSlider" type="range" min="2000" max="2025" value="2025" step="1">
+    
+    <!-- Display the current selected range -->
+    <p>Selected range: <span id="yearStart">2000</span> – <span id="yearEnd">2025</span></p>
   </div>
 
   <!-- Genre Search -->
