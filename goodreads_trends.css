@@ -71,49 +71,103 @@ h2 {
   fill: #333;
 }
 
-#year-range-slider {
+/* =========================
+   Dual Range Slider Styles
+   ========================= */
+.dual-range {
   position: relative;
-  height: 40px;
+  width: 300px;
+  margin: 0.5rem 0;
 }
 
-#year-range-slider input[type="range"] {
+.dual-range input[type="range"] {
   position: absolute;
   left: 0;
   top: 0;
-  width: 100%;
+  pointer-events: none;
+  -webkit-appearance: none;
   background: transparent;
-  z-index: 5;
+  width: 100%;
 }
 
-#year-range-slider input[type="range"]:last-child {
-  z-index: 4;
-}
-
-#year-range-slider input[type="range"]::-webkit-slider-thumb {
+.dual-range input[type="range"]::-webkit-slider-thumb {
+  pointer-events: all;
+  position: relative;
+  z-index: 3;
+  -webkit-appearance: none;
   height: 14px;
   width: 14px;
   background: #333;
   border-radius: 50%;
   cursor: pointer;
-  -webkit-appearance: none;
 }
 
-#year-range-slider input[type="range"]::-webkit-slider-runnable-track {
+.dual-range input[type="range"]::-webkit-slider-runnable-track {
   height: 4px;
   background: #ccc;
 }
 
-#year-range-labels {
-  margin-top: 5px;
+/* Year labels under slider */
+#year-labels {
   font-size: 0.9em;
+  margin-top: 4px;
 }
 
-#genre-select {
-  min-height: 150px;
+/* =========================
+   Genre Search Chips
+   ========================= */
+.genre-search {
+  width: 250px;
+  position: relative;
+}
+
+.genre-search input {
   width: 100%;
-  padding: 4px;
-  font-size: 0.9em;
-  border-radius: 6px;
+  padding: 6px 8px;
   border: 1px solid #ccc;
+  border-radius: 6px;
+}
+
+.genre-suggestions {
+  position: absolute;
+  background: white;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  width: 100%;
+  max-height: 150px;
   overflow-y: auto;
+  z-index: 5;
+  display: none;
+}
+
+.genre-suggestions div {
+  padding: 6px 8px;
+  cursor: pointer;
+}
+
+.genre-suggestions div:hover {
+  background: #eee;
+}
+
+.selected-genres {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+  margin-top: 6px;
+}
+
+.genre-chip {
+  background: #333;
+  color: white;
+  padding: 4px 8px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.85em;
+}
+
+.genre-chip span {
+  cursor: pointer;
+  font-weight: bold;
 }
