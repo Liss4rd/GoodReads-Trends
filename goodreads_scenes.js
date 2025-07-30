@@ -7,7 +7,7 @@
   let startYear = 2005;
   let endYear = 2020;
 
-  const width = 1000;
+  const width = 800;
   const height = 160;
 
   const svg = d3.select("#yearSlider")
