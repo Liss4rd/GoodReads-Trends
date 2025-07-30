@@ -14,8 +14,8 @@ window.addEventListener("DOMContentLoaded", () => {
 
       // Load the correct scene
       if (targetId === "scene1") Scene1();
-      if (targetId === "scene2") Scene2();
-      if (targetId === "scene3") Scene3();
+      else if (targetId === "scene2") Scene2();
+      else if (targetId === "scene3") Scene3();
     });
   });
 
@@ -23,74 +23,86 @@ window.addEventListener("DOMContentLoaded", () => {
   Scene1();
 });
 
+// Function to get publication_year
+function extractYear(pubInfo) {
+  const match = pubInfo?.match(/(\d{4})/);
+  return match ? parseInt(match[1]) : null;
+}
+
 // SCENE 1
 function Scene1() {
+  console.log("Scene 1: Genre Trends Timeline");
+
   d3.csv("Book_Details.csv").then(data => {
-    const genreYearMap = {};
+    const genreYearCounts = {};
 
     data.forEach(row => {
-      const year = +row.publication_year || +row.year || null;
+      const year = extractYear(row.publication_info);
       const genres = row.genres ? row.genres.split(",").map(g => g.trim()) : [];
 
       if (!year || genres.length === 0) return;
 
       genres.forEach(genre => {
-        if (!genreYearMap[genre]) genreYearMap[genre] = {};
-        genreYearMap[genre][year] = (genreYearMap[genre][year] || 0) + 1;
+        if (!genreYearCounts[genre]) genreYearCounts[genre] = {};
+        if (!genreYearCounts[genre][year]) genreYearCounts[genre][year] = 0;
+        genreYearCounts[genre][year] += 1;
       });
     });
 
-    const flatData = [];
-    Object.entries(genreYearMap).forEach(([genre, yearCounts]) => {
-      Object.entries(yearCounts).forEach(([year, count]) => {
-        flatData.push({ genre, year: +year, count: +count });
+    const genreList = Object.keys(genreYearCounts);
+    const allYears = Array.from(
+      new Set(Object.values(genreYearCounts).flatMap(yearsObj => Object.keys(yearsObj).map(Number)))
+    ).sort((a, b) => a - b);
+
+    const stackedData = allYears.map(year => {
+      const entry = { year };
+      genreList.forEach(genre => {
+        entry[genre] = genreYearCounts[genre][year] || 0;
       });
+      return entry;
     });
 
-    drawGenreTimeline(flatData);
+    drawGenreTrendsTimeline(stackedData, genreList);
   });
 }
 
-function drawGenreTimeline(data) {
-  d3.select("#chart1").html("");
-
-  const svg = d3.select("#chart1")
-    .append("svg")
-    .attr("width", 800)
-    .attr("height", 500);
+function drawGenreTrendsTimeline(data, keys) {
+  d3.select("#chart1").html(""); 
 
   const margin = { top: 40, right: 150, bottom: 50, left: 60 },
         width = 800 - margin.left - margin.right,
-        height = 500 - margin.top - margin.bottom;
+        height = 400 - margin.top - margin.bottom;
+
+  const svg = d3.select("#chart1")
+    .append("svg")
+    .attr("width", width + margin.left + margin.right)
+    .attr("height", height + margin.top + margin.bottom);
 
   const g = svg.append("g").attr("transform", `translate(${margin.left},${margin.top})`);
 
-  const years = [...new Set(data.map(d => d.year))].sort((a, b) => a - b);
-  const genres = [...new Set(data.map(d => d.genre))];
-
   const x = d3.scaleLinear()
-    .domain(d3.extent(years))
+    .domain(d3.extent(data, d => d.year))
     .range([0, width]);
 
   const y = d3.scaleLinear()
-    .domain([0, d3.max(data, d => d.count)])
+    .domain([0, d3.max(data, d => d3.max(keys, k => d[k]))])
+    .nice()
     .range([height, 0]);
 
-  const color = d3.scaleOrdinal(d3.schemeCategory10).domain(genres);
+  const color = d3.scaleOrdinal(d3.schemeCategory10).domain(keys);
 
   const line = d3.line()
     .x(d => x(d.year))
-    .y(d => y(d.count));
+    .y(d => y(d.value));
 
-  const genreData = genres.map(genre => {
-    const filtered = data.filter(d => d.genre === genre);
-    return {
-      genre,
-      values: years.map(year => {
-        const found = filtered.find(d => d.year === year);
-        return { year, count: found ? found.count : 0 };
-      })
-    };
+  keys.forEach(key => {
+    const lineData = data.map(d => ({ year: d.year, value: d[key] || 0 }));
+    g.append("path")
+      .datum(lineData)
+      .attr("fill", "none")
+      .attr("stroke", color(key))
+      .attr("stroke-width", 2)
+      .attr("d", line);
   });
 
   g.append("g")
@@ -99,31 +111,117 @@ function drawGenreTimeline(data) {
 
   g.append("g").call(d3.axisLeft(y));
 
-  g.selectAll(".line")
-    .data(genreData)
-    .enter()
-    .append("path")
-    .attr("fill", "none")
-    .attr("stroke", d => color(d.genre))
-    .attr("stroke-width", 1.5)
-    .attr("d", d => line(d.values));
-
+  // Legend
   const legend = svg.append("g")
     .attr("transform", `translate(${width + margin.left + 10},${margin.top})`);
 
-  genres.slice(0, 10).forEach((genre, i) => {
+  keys.forEach((key, i) => {
     const row = legend.append("g").attr("transform", `translate(0, ${i * 20})`);
-    row.append("rect").attr("width", 12).attr("height", 12).attr("fill", color(genre));
-    row.append("text").attr("x", 16).attr("y", 10).text(genre).style("font-size", "12px");
+    row.append("rect").attr("width", 12).attr("height", 12).attr("fill", color(key));
+    row.append("text").attr("x", 16).attr("y", 10).text(key).style("font-size", "12px");
   });
 }
 
-// SCENE 2 
+// SCENE 2: Highest-Ranking Genre Per Year
 function Scene2() {
   console.log("Scene 2: Top Genres per Year");
+
+  d3.csv("Book_Details.csv").then(data => {
+    const genreYearRatings = {};
+
+    data.forEach(row => {
+      const year = extractYear(row.publication_info);
+      const rating = parseFloat(row.average_rating);
+      const genres = row.genres ? row.genres.split(",").map(g => g.trim()) : [];
+
+      if (!year || !rating || isNaN(rating) || genres.length === 0) return;
+
+      genres.forEach(genre => {
+        if (!genreYearRatings[year]) genreYearRatings[year] = {};
+        if (!genreYearRatings[year][genre]) genreYearRatings[year][genre] = { total: 0, count: 0 };
+
+        genreYearRatings[year][genre].total += rating;
+        genreYearRatings[year][genre].count += 1;
+      });
+    });
+
+    const topGenres = Object.entries(genreYearRatings).map(([year, genres]) => {
+      let topGenre = null;
+      let topAvg = -Infinity;
+
+      Object.entries(genres).forEach(([genre, stats]) => {
+        const avg = stats.total / stats.count;
+        if (avg > topAvg) {
+          topAvg = avg;
+          topGenre = genre;
+        }
+      });
+
+      return {
+        year: +year,
+        genre: topGenre,
+        avgRating: +topAvg.toFixed(2)
+      };
+    }).sort((a, b) => a.year - b.year);
+
+    drawTopGenrePerYear(topGenres);
+  });
+}
+
+function drawTopGenrePerYear(data) {
+  d3.select("#chart2").html("");
+
+  const svg = d3.select("#chart2")
+    .append("svg")
+    .attr("width", 800)
+    .attr("height", 500);
+
+  const margin = { top: 40, right: 20, bottom: 50, left: 100 },
+        width = 800 - margin.left - margin.right,
+        height = 500 - margin.top - margin.bottom;
+
+  const g = svg.append("g").attr("transform", `translate(${margin.left},${margin.top})`);
+
+  const x = d3.scaleLinear()
+    .domain([0, d3.max(data, d => d.avgRating)])
+    .range([0, width]);
+
+  const y = d3.scaleBand()
+    .domain(data.map(d => d.year))
+    .range([0, height])
+    .padding(0.2);
+
+  const color = d3.scaleOrdinal(d3.schemeSet2);
+
+  g.append("g").call(d3.axisLeft(y).tickFormat(d3.format("d")));
+
+  g.append("g")
+    .attr("transform", `translate(0, ${height})`)
+    .call(d3.axisBottom(x));
+
+  g.selectAll(".bar")
+    .data(data)
+    .enter()
+    .append("rect")
+    .attr("y", d => y(d.year))
+    .attr("x", 0)
+    .attr("height", y.bandwidth())
+    .attr("width", d => x(d.avgRating))
+    .attr("fill", d => color(d.genre));
+
+  // Add labels
+  g.selectAll(".label")
+    .data(data)
+    .enter()
+    .append("text")
+    .attr("x", d => x(d.avgRating) + 5)
+    .attr("y", d => y(d.year) + y.bandwidth() / 2 + 4)
+    .text(d => `${d.genre} (${d.avgRating})`)
+    .style("font-size", "12px")
+    .style("fill", "#444");
 }
 
 // SCENE 3
 function Scene3() {
-  console.log("Scene 3: Drilldown by Genre");
+  console.log("Scene 3: Genre Exploration");
 }
