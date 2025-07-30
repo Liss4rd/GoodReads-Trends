@@ -41,45 +41,22 @@ header {
   display: none;
 }
 
-#chart1 {
-  width: 100%;
-  min-height: 60vh; 
-}
-
-#chart1 svg,
-#chart2 svg,
-#chart3 svg {
-  background: #fff;
-  border: 1px solid #ccc;
-  border-radius: 6px;
-  font-family: Arial, sans-serif;
-  display: block;
-  margin: 0 auto; 
-  padding: 10px;
-  box-sizing: border-box;
-}
-
 h2 {
   margin-top: 0;
   margin-bottom: 1rem;
   color: #444;
 }
 
-.label {
-  font-size: 14px;
-  font-weight: bold;
-  fill: #333;
-}
-
-/* Dual Range Slider Styles */
+/* =========================
+   Dual Range Slider Styles
+   ========================= */
 .range-slider {
   position: relative;
-  width: 400px;                 
-  height: 40px;                 
+  width: 400px;
+  height: 40px;
   margin: 20px 0;
 }
 
-/* Track background (grey) */
 .range-slider::before {
   content: "";
   position: absolute;
@@ -93,38 +70,35 @@ h2 {
   z-index: 0;
 }
 
-/* Filled range (blue section between thumbs) */
 .slider-track {
   position: absolute;
   top: 50%;
   height: 6px;
   transform: translateY(-50%);
-  background: #1f77b4; /* Goodreads-ish blue */
+  background: #1f77b4;
   border-radius: 3px;
   z-index: 1;
 }
 
-/* Inputs */
 .range-slider input[type=range] {
-  pointer-events: none;        
+  pointer-events: none;
   -webkit-appearance: none;
   appearance: none;
   position: absolute;
   left: 0;
-  top: 50%;                  
+  top: 50%;
   transform: translateY(-50%);
   width: 100%;
-  background: none; /* transparent track */
+  background: none;
   outline: none;
   margin: 0;
-  z-index: 2; /* both above the fill */
+  z-index: 2;
 }
 
-/* Thumbs */
 .range-slider input[type=range]::-webkit-slider-thumb {
-  pointer-events: all;         
-  position: relative;        
-  z-index: 3; /* thumbs always above everything */
+  pointer-events: all;
+  position: relative;
+  z-index: 3;
   -webkit-appearance: none;
   width: 18px;
   height: 18px;
@@ -133,6 +107,7 @@ h2 {
   border-radius: 50%;
   cursor: pointer;
 }
+
 .range-slider input[type=range]::-moz-range-thumb {
   pointer-events: all;
   z-index: 3;
@@ -148,7 +123,6 @@ h2 {
   background: transparent;
 }
 
-/* Year labels under slider */
 .year-labels {
   display: flex;
   justify-content: space-between;
@@ -156,59 +130,14 @@ h2 {
   color: #333;
   margin-top: 4px;
 }
-/* Genre Search Chips */
-.genre-search {
-  width: 250px;
-  position: relative;
+
+.control-block {
+  margin-top: 20px;
 }
 
-.genre-search input {
-  width: 100%;
+.control-block input {
+  width: 250px;
   padding: 6px 8px;
   border: 1px solid #ccc;
   border-radius: 6px;
-}
-
-.genre-suggestions {
-  position: absolute;
-  background: white;
-  border: 1px solid #ccc;
-  border-radius: 4px;
-  width: 100%;
-  max-height: 150px;
-  overflow-y: auto;
-  z-index: 5;
-  display: none;
-}
-
-.genre-suggestions div {
-  padding: 6px 8px;
-  cursor: pointer;
-}
-
-.genre-suggestions div:hover {
-  background: #eee;
-}
-
-.selected-genres {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 5px;
-  margin-top: 6px;
-}
-
-.genre-chip {
-  background: #333;
-  color: white;
-  padding: 4px 8px;
-  border-radius: 12px;
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  font-size: 0.85em;
-}
-
-.genre-chip span {
-  cursor: pointer;
-  font-weight: bold;
 }
