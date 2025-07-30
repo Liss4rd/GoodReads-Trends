@@ -23,16 +23,13 @@
 <!-- Scene 1 Controls -->
 <div id="scene1-controls">
 
-  <!-- Year Range -->
-  <div class="range-slider">
-    <div class="slider-track"></div>
-    <input id="fromSlider" type="range" min="2000" max="2025" value="2000" step="1">
-    <input id="toSlider" type="range" min="2000" max="2025" value="2025" step="1">
+  <!-- Year Range Slider -->
+<div id="slider-container">
+  <svg id="yearSlider" width="500" height="80"></svg>
+  <div id="slider-labels">
+    <span id="yearStart">2000</span> – <span id="yearEnd">2025</span>
   </div>
-  <div class="year-labels">
-    <span id="yearStartLabel">2000</span>
-    <span id="yearEndLabel">2025</span>
-  </div>
+</div>
 
   <!-- Genre Search -->
   <div class="control-block">
