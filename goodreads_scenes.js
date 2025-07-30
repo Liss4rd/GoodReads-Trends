@@ -19,6 +19,15 @@
     .range([50, width + 50])
     .clamp(true);
 
+  const axis = d3.axisBottom(x)
+    .tickFormat(d3.format("d")) 
+    .ticks((maxYear - minYear) / 5); 
+
+  svg.append("g")
+    .attr("class", "slider-axis")
+    .attr("transform", `translate(0, ${height / 2 + 20})`)
+    .call(axis);
+  
   // Track line
   svg.append("line")
     .attr("class", "track")
