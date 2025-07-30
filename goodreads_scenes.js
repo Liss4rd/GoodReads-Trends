@@ -8,7 +8,7 @@
   let endYear = 2020;
 
   const width = 1000;
-  const height = 100;
+  const height = 160;
 
   const svg = d3.select("#yearSlider")
     .attr("width", width + 100)
@@ -25,7 +25,7 @@
 
   svg.append("g")
     .attr("class", "slider-axis")
-    .attr("transform", `translate(0, ${height / 2 + 40})`)
+    .attr("transform", `translate(0, ${height / 2 + 50})`)
     .call(axis);
   
   // Track line
