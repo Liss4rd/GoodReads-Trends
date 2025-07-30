@@ -28,7 +28,6 @@ function extractYear(pubInfo) {
   return match ? parseInt(match[1]) : null;
 }
 
-// Year Range Slider Setup
 const minYear = 2000;
 const maxYear = 2025;
 
@@ -37,39 +36,37 @@ const endSlider = document.getElementById("year-end");
 const startLabel = document.getElementById("year-start-label");
 const endLabel = document.getElementById("year-end-label");
 
+startSlider.min = minYear;
+startSlider.max = maxYear;
+endSlider.min = minYear;
+endSlider.max = maxYear;
+
 startSlider.value = minYear;
 endSlider.value = maxYear;
-
 startLabel.textContent = minYear;
 endLabel.textContent = maxYear;
 
-function updateSliderLabels() {
-  let startVal = Math.min(+startSlider.value, +endSlider.value - 1);
-  let endVal = Math.max(+endSlider.value, +startSlider.value + 1);
+let fullData = null;
+let genreYearCounts = {};
+let genreTotalCounts = {};
+let allYears = [];
 
-  startSlider.value = startVal;
-  endSlider.value = endVal;
+startSlider.addEventListener("input", updateScene1);
+endSlider.addEventListener("input", updateScene1);
+document.getElementById("genre-select").addEventListener("change", updateScene1);
 
-  startLabel.textContent = startVal;
-  endLabel.textContent = endVal;
-
-  updateScene1();
-}
-
-startSlider.addEventListener("input", updateSliderLabels);
-endSlider.addEventListener("input", updateSliderLabels);
-
-// SCENE 1
+// Scene 1
 function Scene1() {
   console.log("Scene 1: Genre Trends Timeline");
 
   d3.csv("Book_Details.csv").then(data => {
-    const genreYearCounts = {};
-    const genreTotalCounts = {};
+    fullData = data;
+    genreYearCounts = {};
+    genreTotalCounts = {};
 
     data.forEach(row => {
       const year = extractYear(row.publication_info);
-      if (!year) return;
+      if (!year || year < 1900 || year > 2025) return;
 
       let genres = [];
       if (row.genres) {
@@ -86,36 +83,16 @@ function Scene1() {
         if (!genreYearCounts[genre]) genreYearCounts[genre] = {};
         if (!genreYearCounts[genre][year]) genreYearCounts[genre][year] = 0;
         genreYearCounts[genre][year]++;
-
         genreTotalCounts[genre] = (genreTotalCounts[genre] || 0) + 1;
       });
     });
 
-    // Find available years
-    const allYears = Array.from(
-      new Set(Object.values(genreYearCounts).flatMap(yearsObj => Object.keys(yearsObj).map(Number)))
+    // Build list of all years
+    allYears = Array.from(
+      new Set(Object.values(genreYearCounts).flatMap(obj => Object.keys(obj).map(Number)))
     ).sort((a, b) => a - b);
 
-    // Populate year sliders from data
-    const minYear = d3.min(allYears) || 2000;
-    const maxYear = d3.max(allYears) || 2020;
-
-    const yearMinSlider = document.getElementById("year-min");
-    const yearMaxSlider = document.getElementById("year-max");
-    const yearMinLabel = document.getElementById("year-min-label");
-    const yearMaxLabel = document.getElementById("year-max-label");
-
-    yearMinSlider.min = minYear;
-    yearMinSlider.max = maxYear;
-    yearMinSlider.value = minYear;
-    yearMinLabel.textContent = minYear;
-
-    yearMaxSlider.min = minYear;
-    yearMaxSlider.max = maxYear;
-    yearMaxSlider.value = maxYear;
-    yearMaxLabel.textContent = maxYear;
-
-    // Populate genre multi-select
+    // Populate genre dropdown
     const genreSelect = document.getElementById("genre-select");
     genreSelect.innerHTML = "";
     Object.keys(genreTotalCounts).sort().forEach(g => {
@@ -125,45 +102,38 @@ function Scene1() {
       genreSelect.appendChild(opt);
     });
 
-    // Function to update chart based on filters
-    function updateScene1() {
-      const yearMin = +yearMinSlider.value;
-      const yearMax = +yearMaxSlider.value;
-      yearMinLabel.textContent = yearMin;
-      yearMaxLabel.textContent = yearMax;
-
-      const selectedGenres = Array.from(genreSelect.selectedOptions).map(o => o.value);
-      let chosenGenres;
-      if (selectedGenres.length > 0) {
-        chosenGenres = selectedGenres;
-      } else {
-        chosenGenres = Object.entries(genreTotalCounts)
-          .sort((a, b) => b[1] - a[1])
-          .slice(0, 5)
-          .map(d => d[0]);
-      }
-
-      const stackedData = allYears.map(year => {
-        const entry = { year };
-        chosenGenres.forEach(genre => {
-          entry[genre] = genreYearCounts[genre]?.[year] || 0;
-        });
-        return entry;
-      });
-
-      const filteredData = stackedData.filter(d => d.year >= yearMin && d.year <= yearMax);
-      drawGenreTrendsTimeline(filteredData, chosenGenres);
-    }
-
-    yearMinSlider.addEventListener("input", updateScene1);
-    yearMaxSlider.addEventListener("input", updateScene1);
-    genreSelect.addEventListener("change", updateScene1);
-
     updateScene1();
   });
 }
 
-// Draw line chart for Scene 1
+// Scene 1 redraw
+function updateScene1() {
+  const startVal = Math.min(+startSlider.value, +endSlider.value - 1);
+  const endVal = Math.max(+endSlider.value, +startSlider.value + 1);
+  startSlider.value = startVal;
+  endSlider.value = endVal;
+  startLabel.textContent = startVal;
+  endLabel.textContent = endVal;
+
+  const genreSelect = document.getElementById("genre-select");
+  const selectedGenres = Array.from(genreSelect.selectedOptions).map(o => o.value);
+  const chosenGenres = selectedGenres.length > 0
+    ? selectedGenres
+    : Object.entries(genreTotalCounts).sort((a, b) => b[1] - a[1]).slice(0, 5).map(d => d[0]);
+
+  const stackedData = allYears.map(year => {
+    const entry = { year };
+    chosenGenres.forEach(genre => {
+      entry[genre] = genreYearCounts[genre]?.[year] || 0;
+    });
+    return entry;
+  });
+
+  const filtered = stackedData.filter(d => d.year >= startVal && d.year <= endVal);
+  drawGenreTrendsTimeline(filtered, chosenGenres);
+}
+
+// Chart
 function drawGenreTrendsTimeline(data, keys) {
   d3.select("#chart1").html("");
 
@@ -188,13 +158,12 @@ function drawGenreTrendsTimeline(data, keys) {
     .nice()
     .range([height, 0]);
 
-  const color = d3.scaleOrdinal(d3.schemeCategory10).domain(keys);
+  const color = d3.scaleOrdinal(d3.schemeTableau10).domain(keys);
   const line = d3.line()
     .defined(d => d.value !== 0)
     .x(d => x(d.year))
     .y(d => y(d.value));
 
-  // Draw lines
   keys.forEach(key => {
     const lineData = data.map(d => ({ year: d.year, value: d[key] || 0 }));
     g.append("path")
@@ -205,30 +174,25 @@ function drawGenreTrendsTimeline(data, keys) {
       .attr("d", line);
   });
 
-  // Axes
   g.append("g")
     .attr("transform", `translate(0,${height})`)
     .call(d3.axisBottom(x).tickFormat(d3.format("d")));
 
   g.append("g").call(d3.axisLeft(y));
 
-  // Labels
   svg.append("text")
-    .attr("class", "x label")
-    .attr("text-anchor", "middle")
     .attr("x", (width + margin.left + margin.right) / 2)
     .attr("y", height + margin.top + 35)
+    .attr("text-anchor", "middle")
     .text("Publishing Year");
 
   svg.append("text")
-    .attr("class", "y label")
-    .attr("text-anchor", "middle")
     .attr("transform", "rotate(-90)")
     .attr("x", - (height / 2) - margin.top)
     .attr("y", 15)
+    .attr("text-anchor", "middle")
     .text("Number of Books");
 
-  // Legend
   const legend = svg.append("g")
     .attr("transform", `translate(${width + margin.left + 10},${margin.top})`);
 
@@ -239,12 +203,10 @@ function drawGenreTrendsTimeline(data, keys) {
   });
 }
 
-// SCENE 2
+// Scene 2 & 3 
 function Scene2() {
   console.log("Scene 2: Top Genres per Year");
 }
-
-// SCENE 3
 function Scene3() {
   console.log("Scene 3: Drilldown by Genre");
 }
