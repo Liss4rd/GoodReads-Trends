@@ -7,7 +7,7 @@
   let startYear = 2005;
   let endYear = 2020;
 
-  const width = 400;
+  const width = 700;
   const height = 150;
 
   const svg = d3.select("#yearSlider")
@@ -21,7 +21,7 @@
 
   const axis = d3.axisBottom(x)
     .tickFormat(d3.format("d")) 
-    .ticks((maxYear - minYear) / 5); 
+    .ticks(maxYear - minYear); 
 
   svg.append("g")
     .attr("class", "slider-axis")
