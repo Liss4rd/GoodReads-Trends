@@ -78,6 +78,14 @@ h2 {
   margin: 20px 0;
 }
 
+#slider-title {
+  font-family: Arial, sans-serif;
+  font-size: 25px;
+  font-weight: bold;
+  color: #444;
+  margin-bottom: 6px;
+}
+
 .track {
   stroke: #ccc;
   stroke-width: 6px;
