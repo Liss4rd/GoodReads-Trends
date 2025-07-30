@@ -74,16 +74,22 @@ h2 {
 /* =========================
    Tableau-style D3 Slider
    ========================= */
-#slider-container {
-  margin: 20px 0;
-}
-
 #slider-title {
   font-family: Arial, sans-serif;
-  font-size: 20px;
+  font-size: 16px;
   font-weight: bold;
   color: #444;
-  margin-bottom: 6px;
+  text-align: center;   /* center slider title */
+  margin-bottom: 10px;
+}
+
+#slider-container {
+  display: flex;
+  justify-content: center; /* center the slider SVG */
+}
+
+#yearSlider {
+  margin-top: 5px;
 }
 
 .track {
