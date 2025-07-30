@@ -28,6 +28,37 @@ function extractYear(pubInfo) {
   return match ? parseInt(match[1]) : null;
 }
 
+// Year Range Slider Setup
+const minYear = 2000;
+const maxYear = 2025;
+
+const startSlider = document.getElementById("year-start");
+const endSlider = document.getElementById("year-end");
+const startLabel = document.getElementById("year-start-label");
+const endLabel = document.getElementById("year-end-label");
+
+startSlider.value = minYear;
+endSlider.value = maxYear;
+
+startLabel.textContent = minYear;
+endLabel.textContent = maxYear;
+
+function updateSliderLabels() {
+  let startVal = Math.min(+startSlider.value, +endSlider.value - 1);
+  let endVal = Math.max(+endSlider.value, +startSlider.value + 1);
+
+  startSlider.value = startVal;
+  endSlider.value = endVal;
+
+  startLabel.textContent = startVal;
+  endLabel.textContent = endVal;
+
+  updateScene1();
+}
+
+startSlider.addEventListener("input", updateSliderLabels);
+endSlider.addEventListener("input", updateSliderLabels);
+
 // SCENE 1
 function Scene1() {
   console.log("Scene 1: Genre Trends Timeline");
