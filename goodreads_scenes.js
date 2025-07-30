@@ -25,83 +25,97 @@ window.addEventListener("DOMContentLoaded", () => {
 
 // SCENE 1
 function Scene1() {
-  console.log("Scene 1: Genre Trends Timeline");
+  d3.csv("Book_Details.csv").then(data => {
+    const genreYearMap = {};
 
-  d3.select("#chart1").selectAll("*").remove();
+    data.forEach(row => {
+      const year = +row.publication_year || +row.year || null;
+      const genres = row.genres ? row.genres.split(",").map(g => g.trim()) : [];
 
-  const margin = { top: 40, right: 80, bottom: 40, left: 60 };
-  const width = 800 - margin.left - margin.right;
-  const height = 400 - margin.top - margin.bottom;
+      if (!year || genres.length === 0) return;
+
+      genres.forEach(genre => {
+        if (!genreYearMap[genre]) genreYearMap[genre] = {};
+        genreYearMap[genre][year] = (genreYearMap[genre][year] || 0) + 1;
+      });
+    });
+
+    const flatData = [];
+    Object.entries(genreYearMap).forEach(([genre, yearCounts]) => {
+      Object.entries(yearCounts).forEach(([year, count]) => {
+        flatData.push({ genre, year: +year, count: +count });
+      });
+    });
+
+    drawGenreTimeline(flatData);
+  });
+}
+
+function drawGenreTimeline(data) {
+  d3.select("#chart1").html("");
 
   const svg = d3.select("#chart1")
     .append("svg")
-    .attr("width", width + margin.left + margin.right)
-    .attr("height", height + margin.top + margin.bottom)
-    .append("g")
-    .attr("transform", `translate(${margin.left},${margin.top})`);
+    .attr("width", 800)
+    .attr("height", 500);
 
-  const data = [
-    { year: 2010, fantasy: 100, romance: 90, scifi: 40 },
-    { year: 2011, fantasy: 110, romance: 95, scifi: 55 },
-    { year: 2012, fantasy: 115, romance: 100, scifi: 60 },
-    { year: 2013, fantasy: 130, romance: 105, scifi: 70 },
-    { year: 2014, fantasy: 125, romance: 110, scifi: 85 },
-    { year: 2015, fantasy: 140, romance: 120, scifi: 95 }
-  ];
+  const margin = { top: 40, right: 150, bottom: 50, left: 60 },
+        width = 800 - margin.left - margin.right,
+        height = 500 - margin.top - margin.bottom;
 
-  const keys = ["fantasy", "romance", "scifi"];
+  const g = svg.append("g").attr("transform", `translate(${margin.left},${margin.top})`);
+
+  const years = [...new Set(data.map(d => d.year))].sort((a, b) => a - b);
+  const genres = [...new Set(data.map(d => d.genre))];
 
   const x = d3.scaleLinear()
-    .domain(d3.extent(data, d => d.year))
+    .domain(d3.extent(years))
     .range([0, width]);
 
   const y = d3.scaleLinear()
-    .domain([0, d3.max(data, d => d3.max(keys, key => d[key]))])
-    .nice()
+    .domain([0, d3.max(data, d => d.count)])
     .range([height, 0]);
 
-  const color = d3.scaleOrdinal()
-    .domain(keys)
-    .range(["#8e44ad", "#e74c3c", "#3498db"]);
+  const color = d3.scaleOrdinal(d3.schemeCategory10).domain(genres);
 
   const line = d3.line()
     .x(d => x(d.year))
-    .y((d) => y(d[d.key]));
+    .y(d => y(d.count));
 
-  keys.forEach((key) => {
-    const genreData = data.map(d => ({ year: d.year, [key]: d[key], key }));
-    svg.append("path")
-      .datum(genreData)
-      .attr("fill", "none")
-      .attr("stroke", color(key))
-      .attr("stroke-width", 2)
-      .attr("d", line);
+  const genreData = genres.map(genre => {
+    const filtered = data.filter(d => d.genre === genre);
+    return {
+      genre,
+      values: years.map(year => {
+        const found = filtered.find(d => d.year === year);
+        return { year, count: found ? found.count : 0 };
+      })
+    };
   });
 
-  svg.append("g")
+  g.append("g")
     .attr("transform", `translate(0,${height})`)
     .call(d3.axisBottom(x).tickFormat(d3.format("d")));
 
-  svg.append("g")
-    .call(d3.axisLeft(y));
+  g.append("g").call(d3.axisLeft(y));
 
-  // Legend
-  const legend = svg.selectAll(".legend")
-    .data(keys)
+  g.selectAll(".line")
+    .data(genreData)
     .enter()
-    .append("g")
-    .attr("transform", (d, i) => `translate(${width + 10},${i * 20})`);
+    .append("path")
+    .attr("fill", "none")
+    .attr("stroke", d => color(d.genre))
+    .attr("stroke-width", 1.5)
+    .attr("d", d => line(d.values));
 
-  legend.append("rect")
-    .attr("x", 0)
-    .attr("width", 10)
-    .attr("height", 10)
-    .attr("fill", d => color(d));
+  const legend = svg.append("g")
+    .attr("transform", `translate(${width + margin.left + 10},${margin.top})`);
 
-  legend.append("text")
-    .attr("x", 15)
-    .attr("y", 10)
-    .text(d => d);
+  genres.slice(0, 10).forEach((genre, i) => {
+    const row = legend.append("g").attr("transform", `translate(0, ${i * 20})`);
+    row.append("rect").attr("width", 12).attr("height", 12).attr("fill", color(genre));
+    row.append("text").attr("x", 16).attr("y", 10).text(genre).style("font-size", "12px");
+  });
 }
 
 // SCENE 2 
