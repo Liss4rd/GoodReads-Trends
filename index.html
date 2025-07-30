@@ -4,61 +4,63 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>GoodReads Trends Narrative Visualization</title>
-
   <link rel="stylesheet" href="goodreads_trends.css" />
   <script src="https://d3js.org/d3.v7.min.js"></script>
 </head>
 <body>
 
-  <header>
-    <h1>GoodReads Trends Narrative Visualization</h1>
-    <p>Explore book reviews, likes, and covers!</p>
-  </header>
+<header>
+  <h1>GoodReads Trends Narrative Visualization</h1>
+  <p>Explore book reviews, likes, and covers!</p>
+</header>
 
-  <div class="tab-container">
-    <button class="tab-button active" data-tab="scene1">Timeline of Genre Trends</button>
-    <button class="tab-button" data-tab="scene2">Highest Ranking Genre Per Year</button>
-    <button class="tab-button" data-tab="scene3">Genre Inspection</button>
-  </div>
+<div class="tab-container">
+  <button class="tab-button active" data-tab="scene1">Timeline of Genre Trends</button>
+  <button class="tab-button" data-tab="scene2">Highest Ranking Genre Per Year</button>
+  <button class="tab-button" data-tab="scene3">Genre Inspection</button>
+</div>
 
-  <!-- SCENE 1 -->
-  <div id="scene1" class="tab-content">
-    <h2>Scene 1: Genre Timeline</h2>
+<!-- Scene 1 Controls -->
+<div id="scene1-controls">
 
-    <div id="scene1-controls">
-      <!-- Year Range -->
-      <div class="range-container">
-        <label for="year-start">Publication Year Range:</label>
-        <input type="range" id="year-start" min="2000" max="2025" step="1">
-        <input type="range" id="year-end" min="2000" max="2025" step="1">
-        <div id="year-range-labels">
-          <span id="year-start-label">2000</span> – 
-          <span id="year-end-label">2025</span>
-        </div>
-      </div>
-
-      <!-- Genre Multi-Select -->
-      <div class="genre-container">
-        <label for="genre-select">Genres:</label>
-        <select id="genre-select" multiple size="8"></select>
-      </div>
+  <!-- Year Range -->
+  <div class="control-block">
+    <label>Publication Year Range:</label>
+    <div id="year-slider-container">
+      <input type="range" id="year-start" min="2000" max="2025" value="2000" step="1">
+      <input type="range" id="year-end" min="2000" max="2025" value="2025" step="1">
     </div>
-
-    <div id="chart1"></div>
+    <div class="year-labels">
+      <span id="year-start-label">2000</span> – <span id="year-end-label">2025</span>
+    </div>
   </div>
 
-  <!-- SCENE 2 -->
-  <div id="scene2" class="tab-content hidden">
-    <h2>Scene 2: Top Genres per Year</h2>
-    <div id="chart2"></div>
+  <!-- Genre Search -->
+  <div class="control-block">
+    <label for="genre-search">Search & Select Genres:</label>
+    <input type="text" id="genre-search" placeholder="Type to search genres..." />
+    <div id="genre-suggestions"></div>
+    <div id="selected-genres"></div>
   </div>
 
-  <!-- SCENE 3 -->
-  <div id="scene3" class="tab-content hidden">
-    <h2>Scene 3: Genre Exploration</h2>
-    <div id="chart3"></div>
-  </div>
+</div>
 
-  <script src="goodreads_scenes.js" defer></script>
+<!-- Scene 1 -->
+<div id="scene1" class="tab-content">
+  <h2>Scene 1: Genre Timeline</h2>
+  <div id="chart1"></div>
+</div>
+
+<div id="scene2" class="tab-content hidden">
+  <h2>Scene 2: Top Genres per Year</h2>
+  <div id="chart2"></div>
+</div>
+
+<div id="scene3" class="tab-content hidden">
+  <h2>Scene 3: Genre Exploration</h2>
+  <div id="chart3"></div>
+</div>
+
+<script src="goodreads_scenes.js" defer></script>
 </body>
 </html>
