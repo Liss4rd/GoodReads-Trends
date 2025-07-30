@@ -68,3 +68,40 @@ h2 {
   font-weight: bold;
   fill: #333; /* dark text */
 }
+
+#year-range-slider {
+  position: relative;
+  height: 40px;
+}
+
+#year-range-slider input[type="range"] {
+  position: absolute;
+  left: 0;
+  top: 0;
+  pointer-events: none; 
+  width: 100%;
+  -webkit-appearance: none;
+  background: transparent;
+}
+
+#year-range-slider input[type="range"]::-webkit-slider-thumb {
+  pointer-events: all;
+  position: relative;
+  z-index: 10;
+  -webkit-appearance: none;
+  height: 14px;
+  width: 14px;
+  background: #333;
+  border-radius: 50%;
+  cursor: pointer;
+}
+
+#year-range-slider input[type="range"]::-webkit-slider-runnable-track {
+  height: 4px;
+  background: #ccc;
+}
+
+#genre-select {
+  min-height: 150px;
+  overflow-y: auto;
+}
