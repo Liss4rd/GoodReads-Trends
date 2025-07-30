@@ -141,3 +141,38 @@ h2 {
   border: 1px solid #ccc;
   border-radius: 6px;
 }
+
+/* =========================
+   D3 Tableau-Style Slider
+   ========================= */
+#slider-container {
+  text-align: center;
+  margin: 20px auto;
+}
+
+#yearSlider {
+  overflow: visible;
+}
+
+.track {
+  stroke: #ccc;
+  stroke-width: 6px;
+}
+
+.track-fill {
+  stroke: steelblue;
+  stroke-width: 6px;
+}
+
+.thumb {
+  fill: white;
+  stroke: #555;
+  stroke-width: 2px;
+  cursor: pointer;
+}
+
+#slider-labels {
+  margin-top: 8px;
+  font-size: 16px;
+  font-weight: bold;
+}
