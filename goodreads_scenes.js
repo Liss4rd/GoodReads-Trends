@@ -1,19 +1,29 @@
-// Tab functionality
-document.querySelectorAll(".tab-button").forEach(button => {
-  button.addEventListener("click", () => {
-    document.querySelectorAll(".tab-button").forEach(btn => btn.classList.remove("active"));
-    button.classList.add("active");
+window.addEventListener("DOMContentLoaded", () => {
+  // Tab functionality
+  document.querySelectorAll(".tab-button").forEach(button => {
+    button.addEventListener("click", () => {
+      document.querySelectorAll(".tab-button").forEach(btn => btn.classList.remove("active"));
+      button.classList.add("active");
 
-    // Hide all tab contents
-    document.querySelectorAll(".tab-content").forEach(content => content.classList.add("hidden"));
+      // Hide all scenes
+      document.querySelectorAll(".tab-content").forEach(content => content.classList.add("hidden"));
 
-    // Show selected tab content
-    const targetId = button.getAttribute("data-tab");
-    document.getElementById(targetId).classList.remove("hidden");
+      // Show selected scene
+      const targetId = button.getAttribute("data-tab");
+      document.getElementById(targetId).classList.remove("hidden");
+
+      // Load the correct scene
+      if (targetId === "scene1") Scene1();
+      if (targetId === "scene2") Scene2();
+      if (targetId === "scene3") Scene3();
+    });
   });
+
+  // Load initial scene
+  Scene1();
 });
 
-
+// SCENE 1
 function Scene1() {
   console.log("Scene 1: Genre Trends Timeline");
 
@@ -23,15 +33,13 @@ function Scene1() {
   const width = 800 - margin.left - margin.right;
   const height = 400 - margin.top - margin.bottom;
 
-  const svg = d3
-    .select("#chart1")
+  const svg = d3.select("#chart1")
     .append("svg")
     .attr("width", width + margin.left + margin.right)
     .attr("height", height + margin.top + margin.bottom)
     .append("g")
     .attr("transform", `translate(${margin.left},${margin.top})`);
 
-  // Test data
   const data = [
     { year: 2010, fantasy: 100, romance: 90, scifi: 40 },
     { year: 2011, fantasy: 110, romance: 95, scifi: 55 },
@@ -43,13 +51,11 @@ function Scene1() {
 
   const keys = ["fantasy", "romance", "scifi"];
 
-  const x = d3
-    .scaleLinear()
+  const x = d3.scaleLinear()
     .domain(d3.extent(data, d => d.year))
     .range([0, width]);
 
-  const y = d3
-    .scaleLinear()
+  const y = d3.scaleLinear()
     .domain([0, d3.max(data, d => d3.max(keys, key => d[key]))])
     .nice()
     .range([height, 0]);
@@ -60,9 +66,9 @@ function Scene1() {
 
   const line = d3.line()
     .x(d => x(d.year))
-    .y((d, i, arr) => y(d[arr[i].key]));
+    .y((d) => y(d[d.key]));
 
-  keys.forEach((key, i) => {
+  keys.forEach((key) => {
     const genreData = data.map(d => ({ year: d.year, [key]: d[key], key }));
     svg.append("path")
       .datum(genreData)
@@ -72,12 +78,10 @@ function Scene1() {
       .attr("d", line);
   });
 
-  // X Axis
   svg.append("g")
     .attr("transform", `translate(0,${height})`)
     .call(d3.axisBottom(x).tickFormat(d3.format("d")));
 
-  // Y Axis
   svg.append("g")
     .call(d3.axisLeft(y));
 
@@ -100,36 +104,12 @@ function Scene1() {
     .text(d => d);
 }
 
+// SCENE 2 
 function Scene2() {
-  // Scene2
   console.log("Scene 2: Top Genres per Year");
 }
 
+// SCENE 3
 function Scene3() {
-  // Scene3
   console.log("Scene 3: Drilldown by Genre");
 }
-
-// User Exploration
-function BookCards() {
-  d3.csv("Book_Details.csv").then(data => {
-    const container = d3.select("#vis-container");
-    container.selectAll(".book-card")
-      .data(data)
-      .enter()
-      .append("div")
-      .attr("class", "book-card")
-      .html(d => `
-        <img src="${d.cover_image_uri}" alt="Book cover" class="book-cover" />
-        <div class="book-title">${d.book_title || 'No title'}</div>
-        <div class="book-author">${d.author || 'Unknown author'}</div>
-      `);
-  });
-}
-
-// Initialized scene 
-Scene1();
-
-document.querySelector("[data-tab='scene1']").addEventListener("click", Scene1);
-document.querySelector("[data-tab='scene2']").addEventListener("click", Scene2);
-document.querySelector("[data-tab='scene3']").addEventListener("click", Scene3);
