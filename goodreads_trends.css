@@ -41,6 +41,11 @@ header {
   display: none;
 }
 
+#chart1 {
+  width: 100%;
+  min-height: 60vh; 
+}
+
 #chart1 svg,
 #chart2 svg,
 #chart3 svg {
@@ -48,6 +53,8 @@ header {
   border: 1px solid #ccc;
   border-radius: 6px;
   font-family: Arial, sans-serif;
+  display: block;
+  margin: 0 auto; 
 }
 
 h2 {
