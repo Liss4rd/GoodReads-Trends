@@ -23,7 +23,7 @@ window.addEventListener("DOMContentLoaded", () => {
   Scene1();
 });
 
-// Function to get publication_year
+// Publication info func
 function extractYear(pubInfo) {
   const match = pubInfo?.match(/(\d{4})/);
   return match ? parseInt(match[1]) : null;
@@ -38,6 +38,7 @@ function Scene1() {
 
     data.forEach(row => {
       const year = extractYear(row.publication_info);
+      if (!year) console.warn("Missing year for row:", row);
       const genres = row.genres ? row.genres.split(",").map(g => g.trim()) : [];
 
       if (!year || genres.length === 0) return;
@@ -50,6 +51,8 @@ function Scene1() {
     });
 
     const genreList = Object.keys(genreYearCounts);
+    console.log("Genres found:", genreList);
+
     const allYears = Array.from(
       new Set(Object.values(genreYearCounts).flatMap(yearsObj => Object.keys(yearsObj).map(Number)))
     ).sort((a, b) => a - b);
@@ -62,12 +65,15 @@ function Scene1() {
       return entry;
     });
 
-    drawGenreTrendsTimeline(stackedData, genreList);
+    // Limit years to 2000-2020 for testing
+    const filteredData = stackedData.filter(d => d.year >= 2000 && d.year <= 2020);
+
+    drawGenreTrendsTimeline(filteredData, genreList);
   });
 }
 
 function drawGenreTrendsTimeline(data, keys) {
-  d3.select("#chart1").html(""); 
+  d3.select("#chart1").html(""); //
 
   const margin = { top: 40, right: 150, bottom: 50, left: 60 },
         width = 800 - margin.left - margin.right,
@@ -84,19 +90,27 @@ function drawGenreTrendsTimeline(data, keys) {
     .domain(d3.extent(data, d => d.year))
     .range([0, width]);
 
+  const maxY = d3.max(data, d => d3.max(keys, k => d[k]));
+  console.log("Max Y (count):", maxY);
+
   const y = d3.scaleLinear()
-    .domain([0, d3.max(data, d => d3.max(keys, k => d[k]))])
+    .domain([0, maxY])
     .nice()
     .range([height, 0]);
 
   const color = d3.scaleOrdinal(d3.schemeCategory10).domain(keys);
 
   const line = d3.line()
+    .defined(d => d.value !== 0)
     .x(d => x(d.year))
     .y(d => y(d.value));
 
-  keys.forEach(key => {
+  // Just plot top 3 genres for testing
+  const topKeys = keys.slice(0, 3);
+
+  topKeys.forEach(key => {
     const lineData = data.map(d => ({ year: d.year, value: d[key] || 0 }));
+    console.log(`Drawing line for ${key}:`, lineData);
     g.append("path")
       .datum(lineData)
       .attr("fill", "none")
@@ -115,14 +129,14 @@ function drawGenreTrendsTimeline(data, keys) {
   const legend = svg.append("g")
     .attr("transform", `translate(${width + margin.left + 10},${margin.top})`);
 
-  keys.forEach((key, i) => {
+  topKeys.forEach((key, i) => {
     const row = legend.append("g").attr("transform", `translate(0, ${i * 20})`);
     row.append("rect").attr("width", 12).attr("height", 12).attr("fill", color(key));
     row.append("text").attr("x", 16).attr("y", 10).text(key).style("font-size", "12px");
   });
 }
 
-// SCENE 2: Highest-Ranking Genre Per Year
+// SCENE 2
 function Scene2() {
   console.log("Scene 2: Top Genres per Year");
 
@@ -169,7 +183,7 @@ function Scene2() {
 }
 
 function drawTopGenrePerYear(data) {
-  d3.select("#chart2").html("");
+  d3.select("#chart2").html(""); 
 
   const svg = d3.select("#chart2")
     .append("svg")
@@ -223,5 +237,6 @@ function drawTopGenrePerYear(data) {
 
 // SCENE 3
 function Scene3() {
-  console.log("Scene 3: Genre Exploration");
+  console.log("Scene 3: Drilldown by Genre");
+
 }
