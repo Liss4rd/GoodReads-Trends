@@ -25,7 +25,7 @@
 
   svg.append("g")
     .attr("class", "slider-axis")
-    .attr("transform", `translate(0, ${height / 2 + 20})`)
+    .attr("transform", `translate(0, ${height / 2 + 35})`)
     .call(axis);
   
   // Track line
