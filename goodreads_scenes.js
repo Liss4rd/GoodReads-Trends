@@ -165,6 +165,8 @@
       - margin.top
       - margin.bottom;
 
+    d3.select("#chart1").selectAll("*").remove();
+
     const svg = d3.select("#chart1")
       .append("svg")
       .attr("width", width + margin.left + margin.right)
@@ -173,10 +175,13 @@
       .attr("transform", `translate(${margin.left},${margin.top})`);
 
     // Tooltip
-    const tooltip = d3.select("body").append("div")
+    let tooltip = d3.select(".tooltip");
+    if (tooltip.empty()) {
+      tooltip = d3.select("body").append("div")
       .attr("class", "tooltip")
       .style("opacity", 0);
-
+    }
+    
     const x = d3.scaleLinear()
       .domain([startYear, endYear])
       .range([0, width]);
@@ -296,5 +301,6 @@
   });
 
 })();
+
 
 
