@@ -4,8 +4,8 @@
 (function() {
   const minYear = 2000;
   const maxYear = 2025;
-  let startYear = 2005;
-  let endYear = 2020;
+  window.startYear = 2005; 
+  window.endYear = 2020;
 
   const width = 1000;
   const height = 100;
@@ -94,7 +94,7 @@ let allData = [];
 d3.csv("Book_Details.csv").then(data => {
   const processed = [];
 
-data.forEach(d => {
+  data.forEach(d => {
     let year = null;
     if (d.publication_info) {
       const match = d.publication_info.match(/\b(19|20)\d{2}\b/);
@@ -120,7 +120,7 @@ data.forEach(d => {
   });
 
   allData = processed;
-  updateScene1WithYears(2005, 2020);
+  updateScene1WithYears(startYear, endYear);
 });
 
 
@@ -151,11 +151,11 @@ function updateScene1WithYears(startYear, endYear) {
 }
 
 function drawLineChart(nested, topGenres, startYear, endYear) {
-  const margin = { top: 40, right: 200, bottom: 60, left: 80 };
-  
+  const margin = { top: 40, right: 220, bottom: 60, left: 80 };
+
   const containerWidth = document.querySelector("#chart1").clientWidth;
   const width = containerWidth * 0.8 - margin.left - margin.right;
-
+  
   const viewportHeight = window.innerHeight;
   const sliderHeight = document.querySelector("#slider-container").offsetHeight;
   const extraSpace = 60; 
@@ -184,6 +184,7 @@ function drawLineChart(nested, topGenres, startYear, endYear) {
     .domain(topGenres)
     .range(d3.schemeTableau10);
 
+  // X Axis + Label
   svg.append("g")
     .attr("transform", `translate(0,${height})`)
     .call(d3.axisBottom(x).tickFormat(d3.format("d")));
@@ -196,6 +197,7 @@ function drawLineChart(nested, topGenres, startYear, endYear) {
     .style("font-size", "16px")
     .text("Publication Year");
 
+  // Y Axis + Label
   svg.append("g")
     .call(d3.axisLeft(y));
 
@@ -232,6 +234,7 @@ function drawLineChart(nested, topGenres, startYear, endYear) {
       .attr("fill", color(series.genre));
   });
 
+  // Legend
   const legend = svg.selectAll(".legend")
     .data(topGenres)
     .join("g")
@@ -257,6 +260,3 @@ window.addEventListener("resize", () => {
 });
 
 })();
-
-
-
