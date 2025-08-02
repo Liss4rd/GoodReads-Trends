@@ -205,7 +205,7 @@
       .attr("fill", "#000")
       .attr("text-anchor", "middle")
       .style("font-size", "16px")
-      .text("Review Year");
+      .text("Publication Year");
 
     svg.append("g")
       .call(d3.axisLeft(y));
@@ -217,7 +217,7 @@
       .attr("fill", "#000")
       .attr("text-anchor", "middle")
       .style("font-size", "16px")
-      .text("Number of Reviews");
+      .text("Number of Books Published");
 
     const line = d3.line()
       .x(d => x(d.year))
@@ -257,7 +257,7 @@
         .attr("fill", color(series.genre))
         .on("mouseover", function (event, d) {
           tooltip.transition().duration(200).style("opacity", 0.9);
-          tooltip.html(`<strong>${d.genre}</strong><br/>${d.year}: ${d.count} reviews`)
+          tooltip.html(`<strong>${d.genre}</strong><br/>${d.year}: ${d.count} books`)
             .style("left", (event.pageX + 8) + "px")
             .style("top", (event.pageY - 28) + "px");
         })
@@ -300,5 +300,3 @@
   });
 
 })();
-
-
