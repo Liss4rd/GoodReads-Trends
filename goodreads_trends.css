@@ -62,7 +62,7 @@ header {
 
 h2 {
   margin-top: 0;
-  margin-bottom: 1rem;
+  margin-bottom: 0px;
   color: #444;
 }
 
@@ -135,6 +135,7 @@ h2 {
 .line {
   transition: opacity 0.3s ease;
 }
+
 
 
 
