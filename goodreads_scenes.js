@@ -157,6 +157,7 @@
     const width = containerWidth * 0.8 - margin.left - margin.right;
 
     const buffer = 10;
+    const bodyMargin = 32;
     const height = window.innerHeight
       - document.querySelector("header").offsetHeight
       - document.querySelector(".tab-container").offsetHeight
@@ -164,7 +165,7 @@
       - buffer
       - margin.top
       - margin.bottom
-      - 10;
+      - bodyMargin;
 
     d3.select("#chart1").selectAll("*").remove();
 
@@ -302,6 +303,7 @@
   });
 
 })();
+
 
 
 
