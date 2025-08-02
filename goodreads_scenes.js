@@ -308,6 +308,45 @@
 
 })();
 
+// =============================
+// Tab Switching Logic
+// =============================
+document.addEventListener("DOMContentLoaded", function () {
+    const tabs = document.querySelectorAll(".tab-button");
+    const contents = document.querySelectorAll(".tab-content");
+
+    tabs.forEach(tab => {
+        tab.addEventListener("click", function () {
+            tabs.forEach(t => t.classList.remove("active"));
+            contents.forEach(c => c.classList.add("hidden"));
+
+            this.classList.add("active");
+            const sceneId = this.getAttribute("data-tab");
+            document.getElementById(sceneId).classList.remove("hidden");
+
+            if (sceneId === "scene2" && !document.querySelector("#chart2 svg")) {
+                loadScene2();
+            }
+        });
+    });
+});
+
+// =============================
+// Scene 2 Loader 
+// =============================
+function loadScene2() {
+    const svg = d3.select("#chart2")
+        .append("svg")
+        .attr("width", 800)
+        .attr("height", 400);
+
+    svg.append("text")
+        .attr("x", 50)
+        .attr("y", 50)
+        .text("Scene 2 chart will go here")
+        .attr("font-size", "20px");
+}
+
 
 
 
