@@ -151,7 +151,7 @@
   }
 
   function drawLineChart(nested, topGenres, startYear, endYear) {
-    const margin = { top: 40, right: 220, bottom: 60, left: 80 };
+    const margin = { top: 40, right: 220, bottom: 80, left: 80 };
 
     const containerWidth = document.querySelector("#chart1").clientWidth;
     const width = containerWidth * 0.8 - margin.left - margin.right;
@@ -302,6 +302,7 @@
   });
 
 })();
+
 
 
 
