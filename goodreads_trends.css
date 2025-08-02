@@ -54,6 +54,7 @@ header {
   border-radius: 6px;
   font-family: Arial, sans-serif;
   display: block;
+  padding: 10px;
   margin: 0 auto;
   box-sizing: border-box;
   max-height: calc(100vh - 20px);
@@ -135,6 +136,7 @@ h2 {
 .line {
   transition: opacity 0.3s ease;
 }
+
 
 
 
