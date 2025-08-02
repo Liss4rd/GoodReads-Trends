@@ -57,6 +57,7 @@ header {
   margin: 0 auto;
   padding: 10px;
   box-sizing: border-box;
+  max-height: 100vh;
 }
 
 h2 {
@@ -133,4 +134,5 @@ h2 {
 .line {
   transition: opacity 0.3s ease;
 }
+
 
