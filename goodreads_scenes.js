@@ -4,7 +4,7 @@
 (function() {
   const minYear = 2000;
   const maxYear = 2025;
-  window.startYear = 2005; 
+  window.startYear = 2005;
   window.endYear = 2020;
 
   const width = 1000;
@@ -27,7 +27,7 @@
     .attr("class", "slider-axis")
     .attr("transform", `translate(0, ${height / 2 + 20})`)
     .call(axis);
-  
+
   // Track line
   svg.append("line")
     .attr("class", "track")
@@ -143,7 +143,7 @@ function updateScene1WithYears(startYear, endYear) {
         v => v.length,
         d => d.year
       ),
-      ([year, count]) => ({ year: +year, count })
+      ([year, count]) => ({ year: +year, count, genre })
     ).sort((a, b) => d3.ascending(a.year, b.year))
   }));
 
@@ -155,10 +155,10 @@ function drawLineChart(nested, topGenres, startYear, endYear) {
 
   const containerWidth = document.querySelector("#chart1").clientWidth;
   const width = containerWidth * 0.8 - margin.left - margin.right;
-  
+
   const viewportHeight = window.innerHeight;
   const sliderHeight = document.querySelector("#slider-container").offsetHeight;
-  const extraSpace = 60; 
+  const extraSpace = 60;
   const minHeight = 400;
   const height = Math.max(viewportHeight - sliderHeight - extraSpace - margin.top - margin.bottom, minHeight);
 
@@ -170,6 +170,11 @@ function drawLineChart(nested, topGenres, startYear, endYear) {
     .attr("height", height + margin.top + margin.bottom)
     .append("g")
     .attr("transform", `translate(${margin.left},${margin.top})`);
+
+  // Tooltip
+  const tooltip = d3.select("body").append("div")
+    .attr("class", "tooltip")
+    .style("opacity", 0);
 
   const x = d3.scaleLinear()
     .domain([startYear, endYear])
@@ -184,7 +189,7 @@ function drawLineChart(nested, topGenres, startYear, endYear) {
     .domain(topGenres)
     .range(d3.schemeTableau10);
 
-  // X Axis + Label
+  // Axes + Labels
   svg.append("g")
     .attr("transform", `translate(0,${height})`)
     .call(d3.axisBottom(x).tickFormat(d3.format("d")));
@@ -197,7 +202,6 @@ function drawLineChart(nested, topGenres, startYear, endYear) {
     .style("font-size", "16px")
     .text("Publication Year");
 
-  // Y Axis + Label
   svg.append("g")
     .call(d3.axisLeft(y));
 
@@ -215,14 +219,26 @@ function drawLineChart(nested, topGenres, startYear, endYear) {
     .y(d => y(d.count))
     .curve(d3.curveMonotoneX);
 
-  svg.selectAll(".line")
+  const paths = svg.selectAll(".line")
     .data(nested)
     .join("path")
     .attr("class", "line")
     .attr("fill", "none")
     .attr("stroke", d => color(d.genre))
     .attr("stroke-width", 2.5)
-    .attr("d", d => line(d.values));
+    .attr("d", d => line(d.values))
+    .style("filter", "drop-shadow(0px 0px 3px rgba(0,0,0,0.3))");
+
+  paths.each(function(d) {
+    const totalLength = this.getTotalLength();
+    d3.select(this)
+      .attr("stroke-dasharray", totalLength + " " + totalLength)
+      .attr("stroke-dashoffset", totalLength)
+      .transition()
+      .duration(1500)
+      .ease(d3.easeCubic)
+      .attr("stroke-dashoffset", 0);
+  });
 
   nested.forEach(series => {
     svg.selectAll(`.point-${series.genre}`)
@@ -230,15 +246,31 @@ function drawLineChart(nested, topGenres, startYear, endYear) {
       .join("circle")
       .attr("cx", d => x(d.year))
       .attr("cy", d => y(d.count))
-      .attr("r", 3)
-      .attr("fill", color(series.genre));
+      .attr("r", 4)
+      .attr("fill", color(series.genre))
+      .on("mouseover", function(event, d) {
+        tooltip.transition().duration(200).style("opacity", 0.9);
+        tooltip.html(`<strong>${d.genre}</strong><br/>${d.year}: ${d.count} books`)
+          .style("left", (event.pageX + 8) + "px")
+          .style("top", (event.pageY - 28) + "px");
+      })
+      .on("mouseout", function() {
+        tooltip.transition().duration(300).style("opacity", 0);
+      });
   });
 
-  // Legend
   const legend = svg.selectAll(".legend")
     .data(topGenres)
     .join("g")
-    .attr("transform", (d, i) => `translate(${width + 30},${i * 24})`);
+    .attr("transform", (d, i) => `translate(${width + 30},${i * 24})`)
+    .on("mouseover", function(event, genre) {
+      svg.selectAll(".line").attr("opacity", d => d.genre === genre ? 1 : 0.1);
+      svg.selectAll("circle").attr("opacity", d => d.genre === genre ? 1 : 0.1);
+    })
+    .on("mouseout", function() {
+      svg.selectAll(".line").attr("opacity", 1);
+      svg.selectAll("circle").attr("opacity", 1);
+    });
 
   legend.append("rect")
     .attr("width", 14)
