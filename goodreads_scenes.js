@@ -98,7 +98,7 @@
       let year = null;
 
       if (d.published_info) {
-        const match = d.published_info.match(/\b(19|20)\d{2}\b/);
+        const match = d.publication_info.match(/\b(19|20)\d{2}\b/);
         if (match) {
           year = +match[0];
         }
@@ -300,3 +300,4 @@
   });
 
 })();
+
