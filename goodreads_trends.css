@@ -92,7 +92,7 @@ h2 {
 }
 
 #yearSlider {
-  margin-top: 0px;
+  margin-top: 0;
 }
 
 .track {
@@ -135,6 +135,7 @@ h2 {
 .line {
   transition: opacity 0.3s ease;
 }
+
 
 
 
