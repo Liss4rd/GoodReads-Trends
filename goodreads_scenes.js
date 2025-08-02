@@ -83,9 +83,147 @@
     d3.select("#yearStart").text(startYear);
     d3.select("#yearEnd").text(endYear);
 
-    // TODO: If you want Scene 1 to update:
-    // updateScene1WithYears(startYear, endYear);
+    updateScene1WithYears(startYear, endYear);
   }
 
+// =============================
+// Scene 1: Genre Timeline Chart
+// =============================
+let allData = [];
+
+d3.csv("Book_Details.csv").then(data => {
+  const processed = [];
+
+data.forEach(d => {
+    let year = null;
+    if (d.publication_info) {
+      const match = d.publication_info.match(/\b(19|20)\d{2}\b/);
+      if (match) {
+        year = +match[0];
+      }
+    }
+    if (!year || isNaN(year)) return;
+
+    let genres = [];
+    try {
+      genres = JSON.parse(d.genres.replace(/'/g, '"')); 
+    } catch (e) {
+      genres = [];
+    }
+  
+    genres.forEach(g => {
+      processed.push({
+        year: year,
+        genre: g.trim()
+      });
+    });
+  });
+
+  allData = processed;
+  updateScene1WithYears(2005, 2020);
+});
+
+
+function updateScene1WithYears(startYear, endYear) {
+  const filtered = allData.filter(d => d.year >= startYear && d.year <= endYear);
+
+  const topGenres = Array.from(
+    d3.rollup(filtered, v => v.length, d => d.genre),
+    ([genre, total]) => ({ genre, total })
+  )
+    .sort((a, b) => d3.descending(a.total, b.total))
+    .slice(0, 5)
+    .map(d => d.genre);
+
+  const nested = topGenres.map(genre => ({
+    genre,
+    values: Array.from(
+      d3.rollup(
+        filtered.filter(d => d.genre === genre),
+        v => v.length,
+        d => d.year
+      ),
+      ([year, count]) => ({ year: +year, count })
+    ).sort((a, b) => d3.ascending(a.year, b.year))
+  }));
+
+  drawLineChart(nested, topGenres, startYear, endYear);
+}
+
+function drawLineChart(nested, topGenres, startYear, endYear) {
+  const margin = { top: 30, right: 120, bottom: 40, left: 60 };
+  const width = 900 - margin.left - margin.right;
+  const height = 500 - margin.top - margin.bottom;
+
+  d3.select("#chart1").selectAll("*").remove();
+
+  const svg = d3.select("#chart1")
+    .append("svg")
+    .attr("width", width + margin.left + margin.right)
+    .attr("height", height + margin.top + margin.bottom)
+    .append("g")
+    .attr("transform", `translate(${margin.left},${margin.top})`);
+
+  const x = d3.scaleLinear()
+    .domain([startYear, endYear])
+    .range([0, width]);
+
+  const y = d3.scaleLinear()
+    .domain([0, d3.max(nested, g => d3.max(g.values, v => v.count))])
+    .nice()
+    .range([height, 0]);
+
+  const color = d3.scaleOrdinal()
+    .domain(topGenres)
+    .range(d3.schemeTableau10);
+
+  svg.append("g")
+    .attr("transform", `translate(0,${height})`)
+    .call(d3.axisBottom(x).tickFormat(d3.format("d")));
+
+  svg.append("g")
+    .call(d3.axisLeft(y));
+
+  const line = d3.line()
+    .x(d => x(d.year))
+    .y(d => y(d.count))
+    .curve(d3.curveMonotoneX);
+
+  svg.selectAll(".line")
+    .data(nested)
+    .join("path")
+    .attr("class", "line")
+    .attr("fill", "none")
+    .attr("stroke", d => color(d.genre))
+    .attr("stroke-width", 2.5)
+    .attr("d", d => line(d.values));
+
+  nested.forEach(series => {
+    svg.selectAll(`.point-${series.genre}`)
+      .data(series.values)
+      .join("circle")
+      .attr("cx", d => x(d.year))
+      .attr("cy", d => y(d.count))
+      .attr("r", 3)
+      .attr("fill", color(series.genre));
+  });
+
+  // Legend
+  const legend = svg.selectAll(".legend")
+    .data(topGenres)
+    .join("g")
+    .attr("transform", (d, i) => `translate(${width + 20},${i * 20})`);
+
+  legend.append("rect")
+    .attr("width", 12)
+    .attr("height", 12)
+    .attr("fill", color);
+
+  legend.append("text")
+    .attr("x", 18)
+    .attr("y", 6)
+    .text(d => d);
+}
   update();
 })();
+
