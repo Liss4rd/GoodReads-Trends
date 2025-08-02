@@ -8,7 +8,7 @@
   window.endYear = 2020;
 
   const width = 1000;
-  const height = 100;
+  const height = 80;
 
   const svg = d3.select("#yearSlider")
     .attr("width", width + 100)
@@ -302,6 +302,7 @@
   });
 
 })();
+
 
 
 
