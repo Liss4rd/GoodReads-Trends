@@ -155,7 +155,12 @@ function drawLineChart(nested, topGenres, startYear, endYear) {
   
   const containerWidth = document.querySelector("#chart1").clientWidth;
   const width = containerWidth * 0.8 - margin.left - margin.right;
-  const height = 550 - margin.top - margin.bottom;
+
+  const viewportHeight = window.innerHeight;
+  const sliderHeight = document.querySelector("#slider-container").offsetHeight;
+  const extraSpace = 60; 
+  const minHeight = 400;
+  const height = Math.max(viewportHeight - sliderHeight - extraSpace - margin.top - margin.bottom, minHeight);
 
   d3.select("#chart1").selectAll("*").remove();
 
@@ -252,5 +257,6 @@ window.addEventListener("resize", () => {
 });
 
 })();
+
 
 
