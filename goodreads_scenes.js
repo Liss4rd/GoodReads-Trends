@@ -96,8 +96,9 @@
 
     data.forEach(d => {
       let year = null;
-      if (d.publication_info) {
-        const match = d.publication_info.match(/\b(19|20)\d{2}\b/);
+
+      if (d.published_info) {
+        const match = d.published_info.match(/\b(19|20)\d{2}\b/);
         if (match) {
           year = +match[0];
         }
@@ -152,18 +153,17 @@
   function drawLineChart(nested, topGenres, startYear, endYear) {
     const margin = { top: 40, right: 220, bottom: 60, left: 80 };
 
-  
     const containerWidth = document.querySelector("#chart1").clientWidth;
     const width = containerWidth * 0.8 - margin.left - margin.right;
 
     const viewportHeight = window.innerHeight;
     const headerHeight = document.querySelector("header").offsetHeight;
     const tabsHeight = document.querySelector(".tab-container").offsetHeight;
-    const sliderHeight = document.querySelector("#slider-container").offsetHeight;
     const extraSpace = 40;
     const minHeight = 400;
+
     const height = Math.max(
-      viewportHeight - headerHeight - tabsHeight - sliderHeight - extraSpace - margin.top - margin.bottom,
+      viewportHeight - headerHeight - tabsHeight - extraSpace - margin.top - margin.bottom,
       minHeight
     );
 
@@ -205,7 +205,7 @@
       .attr("fill", "#000")
       .attr("text-anchor", "middle")
       .style("font-size", "16px")
-      .text("Publication Year");
+      .text("Review Year");
 
     svg.append("g")
       .call(d3.axisLeft(y));
@@ -217,7 +217,7 @@
       .attr("fill", "#000")
       .attr("text-anchor", "middle")
       .style("font-size", "16px")
-      .text("Number of Books Published");
+      .text("Number of Reviews");
 
     const line = d3.line()
       .x(d => x(d.year))
@@ -257,7 +257,7 @@
         .attr("fill", color(series.genre))
         .on("mouseover", function (event, d) {
           tooltip.transition().duration(200).style("opacity", 0.9);
-          tooltip.html(`<strong>${d.genre}</strong><br/>${d.year}: ${d.count} books`)
+          tooltip.html(`<strong>${d.genre}</strong><br/>${d.year}: ${d.count} reviews`)
             .style("left", (event.pageX + 8) + "px")
             .style("top", (event.pageY - 28) + "px");
         })
