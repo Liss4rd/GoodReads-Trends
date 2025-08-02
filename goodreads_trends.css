@@ -66,16 +66,6 @@ h2 {
   color: #444;
 }
 
-.scene-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between; 
-}
-
-.scene-header h2 {
-  margin: 0; 
-}
-
 .label {
   font-size: 14px;
   font-weight: bold;
@@ -145,6 +135,7 @@ h2 {
 .line {
   transition: opacity 0.3s ease;
 }
+
 
 
 
