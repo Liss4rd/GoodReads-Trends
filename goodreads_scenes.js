@@ -151,9 +151,11 @@ function updateScene1WithYears(startYear, endYear) {
 }
 
 function drawLineChart(nested, topGenres, startYear, endYear) {
-  const margin = { top: 30, right: 120, bottom: 40, left: 60 };
-  const width = 900 - margin.left - margin.right;
-  const height = 500 - margin.top - margin.bottom;
+  const margin = { top: 40, right: 200, bottom: 60, left: 80 };
+  
+  const containerWidth = document.querySelector("#chart1").clientWidth;
+  const width = containerWidth * 0.8 - margin.left - margin.right;
+  const height = 550 - margin.top - margin.bottom;
 
   d3.select("#chart1").selectAll("*").remove();
 
@@ -226,4 +228,5 @@ function drawLineChart(nested, topGenres, startYear, endYear) {
 }
   update();
 })();
+
 
