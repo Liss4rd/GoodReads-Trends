@@ -165,7 +165,8 @@
       - buffer
       - margin.top
       - margin.bottom
-      - bodyMargin;
+      - bodyMargin
+      - 200;
 
     d3.select("#chart1").selectAll("*").remove();
 
@@ -303,6 +304,7 @@
   });
 
 })();
+
 
 
 
