@@ -3,7 +3,7 @@
 // =========================
 (function () {
   const minYear = 2000;
-  const maxYear = 2025;
+  const maxYear = 2024;
   window.startYear = 2005;
   window.endYear = 2020;
 
@@ -307,6 +307,7 @@
   });
 
 })();
+
 
 
 
