@@ -158,7 +158,8 @@
 
     const buffer = 10;
     const bodyMargin = 32;
-    const height = window.innerHeight
+    const targetHeight = 792;
+    const availableHeight = window.innerHeight
       - document.querySelector("header").offsetHeight
       - document.querySelector(".tab-container").offsetHeight
       - document.querySelector("#slider-container").offsetHeight
@@ -167,6 +168,8 @@
       - margin.bottom
       - bodyMargin
       - 200;
+
+    const height = Math.min(targetHeight, availableHeight);
 
     d3.select("#chart1").selectAll("*").remove();
 
@@ -304,6 +307,7 @@
   });
 
 })();
+
 
 
 
