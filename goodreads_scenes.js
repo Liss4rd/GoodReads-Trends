@@ -299,6 +299,55 @@
       .style("font-size", "14px")
       .text(d => d);
   }
+  
+  // =============================
+  // Scene 2 Loader 
+  // =============================
+  function loadScene2() {
+    const chart1Svg = d3.select("#chart1 svg");
+    const chartWidth = chart1Svg.attr("width") || 800;
+    const chartHeight = chart1Svg.attr("height") || 500;
+
+    const svg = d3.select("#chart2")
+      .append("svg")
+      .attr("width", chartWidth)
+      .attr("height", chartHeight)
+      .append("g")
+      .attr("transform", "translate(80,40)");
+
+    // Placeholder axis
+    const x = d3.scaleLinear().domain([2000, 2025]).range([0, chartWidth - 300]);
+    const y = d3.scaleLinear().domain([0, 100]).range([chartHeight - 120, 0]);
+
+    svg.append("g").attr("transform", `translate(0,${chartHeight - 120})`).call(d3.axisBottom(x));
+    svg.append("g").call(d3.axisLeft(y));
+
+    svg.append("text")
+      .attr("x", (chartWidth - 300) / 2)
+      .attr("y", -10)
+      .attr("text-anchor", "middle")
+      .style("font-size", "16px")
+      .text("Scene 2 Placeholder");
+  }
+
+  // =============================
+  // Tab Switcher
+  // =============================
+  document.querySelectorAll(".tab-button").forEach(btn => {
+    btn.addEventListener("click", () => {
+      document.querySelectorAll(".tab-button").forEach(b => b.classList.remove("active"));
+      btn.classList.add("active");
+
+      document.querySelectorAll(".tab-content").forEach(tc => tc.classList.add("hidden"));
+      const tabId = btn.dataset.tab;
+      document.getElementById(tabId).classList.remove("hidden");
+
+      if (tabId === "scene2") {
+        d3.select("#chart2").selectAll("*").remove();
+        loadScene2();
+      }
+    });
+  });
 
   update();
 
@@ -307,66 +356,6 @@
   });
 
 })();
-
-function loadScene2() {
-  const chart1SVG = document.querySelector("#chart1 svg");
-  let width = 800, height = 400;
-
-  if (chart1SVG) {
-    width = chart1SVG.getAttribute("width");
-    height = chart1SVG.getAttribute("height");
-  }
-
-  const svg = d3.select("#chart2")
-    .append("svg")
-    .attr("width", width)
-    .attr("height", height);
-
-  svg.append("text")
-    .attr("x", 50)
-    .attr("y", 50)
-    .text("Scene 2 chart will go here")
-    .attr("font-size", "20px");
-}
-
-// =============================
-// Tab Switching Logic
-// =============================
-document.addEventListener("DOMContentLoaded", function () {
-    const tabs = document.querySelectorAll(".tab-button");
-    const contents = document.querySelectorAll(".tab-content");
-
-    tabs.forEach(tab => {
-        tab.addEventListener("click", function () {
-            tabs.forEach(t => t.classList.remove("active"));
-            contents.forEach(c => c.classList.add("hidden"));
-
-            this.classList.add("active");
-            const sceneId = this.getAttribute("data-tab");
-            document.getElementById(sceneId).classList.remove("hidden");
-
-            if (sceneId === "scene2" && !document.querySelector("#chart2 svg")) {
-                loadScene2();
-            }
-        });
-    });
-});
-
-// =============================
-// Scene 2 Loader 
-// =============================
-function loadScene2() {
-    const svg = d3.select("#chart2")
-        .append("svg")
-        .attr("width", 800)
-        .attr("height", 400);
-
-    svg.append("text")
-        .attr("x", 50)
-        .attr("y", 50)
-        .text("Scene 2 chart will go here")
-        .attr("font-size", "20px");
-}
 
 
 
