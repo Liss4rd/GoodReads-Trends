@@ -183,8 +183,25 @@ function drawLineChart(nested, topGenres, startYear, endYear) {
     .attr("transform", `translate(0,${height})`)
     .call(d3.axisBottom(x).tickFormat(d3.format("d")));
 
+  svg.append("text")
+    .attr("x", width / 2)
+    .attr("y", height + 45)
+    .attr("fill", "#000")
+    .attr("text-anchor", "middle")
+    .style("font-size", "16px")
+    .text("Publication Year");
+
   svg.append("g")
     .call(d3.axisLeft(y));
+
+  svg.append("text")
+    .attr("x", -height / 2)
+    .attr("y", -60)
+    .attr("transform", "rotate(-90)")
+    .attr("fill", "#000")
+    .attr("text-anchor", "middle")
+    .style("font-size", "16px")
+    .text("Number of Books Published");
 
   const line = d3.line()
     .x(d => x(d.year))
@@ -210,23 +227,30 @@ function drawLineChart(nested, topGenres, startYear, endYear) {
       .attr("fill", color(series.genre));
   });
 
-  // Legend
   const legend = svg.selectAll(".legend")
     .data(topGenres)
     .join("g")
-    .attr("transform", (d, i) => `translate(${width + 20},${i * 20})`);
+    .attr("transform", (d, i) => `translate(${width + 30},${i * 24})`);
 
   legend.append("rect")
-    .attr("width", 12)
-    .attr("height", 12)
+    .attr("width", 14)
+    .attr("height", 14)
     .attr("fill", color);
 
   legend.append("text")
-    .attr("x", 18)
-    .attr("y", 6)
+    .attr("x", 20)
+    .attr("y", 7)
+    .attr("dy", "0.32em")
+    .style("font-size", "14px")
     .text(d => d);
 }
-  update();
+
+update();
+
+window.addEventListener("resize", () => {
+  updateScene1WithYears(startYear, endYear);
+});
+
 })();
 
 
