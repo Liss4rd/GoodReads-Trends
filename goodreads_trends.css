@@ -55,7 +55,6 @@ header {
   font-family: Arial, sans-serif;
   display: block;
   margin: 0 auto;
-  padding: 10px;
   box-sizing: border-box;
   max-height: calc(100vh - 20px);
 }
@@ -136,6 +135,7 @@ h2 {
 .line {
   transition: opacity 0.3s ease;
 }
+
 
 
 
