@@ -304,113 +304,153 @@
 // Scene 2: Popularity vs Quality Bubble Chart
 // =========================
 (function () {
-  const margin = { top: 40, right: 40, bottom: 60, left: 60 };
-  const width = 900 - margin.left - margin.right;
-  const height = 600 - margin.top - margin.bottom;
-
-  const svg = d3.select("#chart2")
-    .append("svg")
-    .attr("width", width + margin.left + margin.right)
-    .attr("height", height + margin.top + margin.bottom)
-    .append("g")
-    .attr("transform", `translate(${margin.left}, ${margin.top})`);
-
-  // Tooltip
-  const tooltip = d3.select("body").append("div")
-    .attr("class", "tooltip")
-    .style("opacity", 0);
-
-  const xScale = d3.scaleLinear().range([0, width]);
-  const yScale = d3.scaleLinear().range([height, 0]);
-  const sizeScale = d3.scaleSqrt().range([4, 40]); 
-  const colorScale = d3.scaleOrdinal(d3.schemeCategory10); 
-
-  // Axes
-  const xAxis = svg.append("g")
-    .attr("transform", `translate(0, ${height})`);
-  const yAxis = svg.append("g");
-
-  svg.append("text")
-    .attr("class", "x axis-label")
-    .attr("x", width / 2)
-    .attr("y", height + 45)
-    .style("text-anchor", "middle")
-    .text("Popularity (Number of Ratings)");
-
-  svg.append("text")
-    .attr("class", "y axis-label")
-    .attr("x", -height / 2)
-    .attr("y", -45)
-    .attr("transform", "rotate(-90)")
-    .style("text-anchor", "middle")
-    .text("Quality (Average Rating)");
+  let allReviewsData = [];
 
   d3.csv("Book_Details.csv").then(data => {
-    data.forEach(d => {
-      d.num_ratings = +d.num_ratings;
-      d.average_rating = +d.averageg_rating;
-      d.num_reviews = +d.num_reviews;
-    });
+    allReviewsData = data.map(d => {
+      let year = null;
+      if (d.publication_info) {
+        const match = d.publication_info.match(/\b(19|20)\d{2}\b/);
+        if (match) year = +match[0];
+      }
+      return {
+        title: d.book_title,
+        genre: d.genre || "Unknown",
+        year: year,
+        average_rating: +d.average_rating || 0,
+        num_reviews: +d.num_reviews || 0,
+        num_ratings: +d.num_ratings || 0
+      };
+    }).filter(d => d.year);
 
-    const initialYear = 2015;
-    updateChart(initialYear);
+    updateScene2WithYears(startYear, endYear);
+  });
 
-    d3.select("#yearSlider").on("input", function () {
-      const year = +this.value;
-      updateChart(year);
-    });
+  window.updateScene2WithYears = function (startYear, endYear) {
+    const filtered = allReviewsData.filter(
+      d => d.year >= startYear && d.year <= endYear
+    );
 
-    function updateChart(year) {
-      const yearData = data.filter(d => +d.publication_year === year);
+    drawBubbleChart(filtered);
+  };
 
-      xScale.domain([0, d3.max(yearData, d => d.num_ratings) * 1.05]);
-      yScale.domain([d3.min(yearData, d => d.average_rating) - 0.2,
-                     d3.max(yearData, d => d.average_rating) + 0.2]);
-      sizeScale.domain([0, d3.max(yearData, d => d.num_reviews)]);
-      colorScale.domain([...new Set(yearData.map(d => d.genre))]);
+  function drawBubbleChart(data) {
+    const margin = { top: 40, right: 40, bottom: 80, left: 80 };
+    const containerWidth = document.querySelector("#chart2").clientWidth;
+    const width = containerWidth * 0.8 - margin.left - margin.right;
 
-      xAxis.transition().duration(750).call(d3.axisBottom(xScale).ticks(8).tickFormat(d3.format(".2s")));
-      yAxis.transition().duration(750).call(d3.axisLeft(yScale));
+    const buffer = 10;
+    const bodyMargin = 32;
+    const targetHeight = 792;
+    const availableHeight =
+      window.innerHeight -
+      document.querySelector("header").offsetHeight -
+      document.querySelector(".tab-container").offsetHeight -
+      document.querySelector("#slider-container").offsetHeight -
+      buffer -
+      margin.top -
+      margin.bottom -
+      bodyMargin -
+      200;
 
-      const bubbles = svg.selectAll(".bubble")
-        .data(yearData, d => d.book_title);
+    const height = Math.min(targetHeight, availableHeight);
 
-      bubbles.exit()
-        .transition().duration(500)
-        .attr("r", 0)
-        .remove();
+    d3.select("#chart2").selectAll("*").remove();
 
-      const bubblesEnter = bubbles.enter()
-        .append("circle")
-        .attr("class", "bubble")
-        .attr("cx", d => xScale(d.num_ratings))
-        .attr("cy", d => yScale(d.average_rating))
-        .attr("r", 0)
-        .style("fill", d => colorScale(d.genre))
-        .style("opacity", 0.7)
-        .on("mouseover", function (event, d) {
-          tooltip.transition().duration(200).style("opacity", 0.9);
-          tooltip.html(`
-            <strong>${d.book_title}</strong><br/>
-            Genre: ${d.genre}<br/>
-            Avg Rating: ${d.average_rating.toFixed(2)}<br/>
-            Ratings: ${d.num_ratings.toLocaleString()}<br/>
-            Reviews: ${d.num_reviews.toLocaleString()}
-          `)
-          .style("left", (event.pageX + 15) + "px")
-          .style("top", (event.pageY - 28) + "px");
-        })
-        .on("mouseout", function () {
-          tooltip.transition().duration(500).style("opacity", 0);
-        });
+    const svg = d3
+      .select("#chart2")
+      .append("svg")
+      .attr("width", width + margin.left + margin.right)
+      .attr("height", height + margin.top + margin.bottom)
+      .append("g")
+      .attr("transform", `translate(${margin.left},${margin.top})`);
 
-      bubblesEnter.merge(bubbles)
-        .transition().duration(750)
-        .attr("cx", d => xScale(d.num_ratings))
-        .attr("cy", d => yScale(d.average_rating))
-        .attr("r", d => sizeScale(d.num_reviews))
-        .style("fill", d => colorScale(d.genre));
+    let tooltip = d3.select(".tooltip");
+    if (tooltip.empty()) {
+      tooltip = d3
+        .select("body")
+        .append("div")
+        .attr("class", "tooltip")
+        .style("opacity", 0);
     }
+
+    const x = d3
+      .scaleLinear()
+      .domain(d3.extent(data, d => d.average_rating))
+      .nice()
+      .range([0, width]);
+
+    const y = d3
+      .scaleLinear()
+      .domain(d3.extent(data, d => d.num_ratings))
+      .nice()
+      .range([height, 0]);
+
+    const size = d3
+      .scaleSqrt()
+      .domain(d3.extent(data, d => d.num_reviews))
+      .range([4, 40]);
+
+    const color = d3.scaleSequential(d3.interpolateBlues)
+      .domain(d3.extent(data, d => d.average_rating));
+
+    // Axes
+    svg
+      .append("g")
+      .attr("transform", `translate(0,${height})`)
+      .call(d3.axisBottom(x));
+
+    svg
+      .append("text")
+      .attr("x", width / 2)
+      .attr("y", height + 45)
+      .attr("fill", "#000")
+      .attr("text-anchor", "middle")
+      .style("font-size", "16px")
+      .text("Average Rating");
+
+    svg.append("g").call(d3.axisLeft(y));
+
+    svg
+      .append("text")
+      .attr("x", -height / 2)
+      .attr("y", -60)
+      .attr("transform", "rotate(-90)")
+      .attr("fill", "#000")
+      .attr("text-anchor", "middle")
+      .style("font-size", "16px")
+      .text("Number of Ratings");
+
+    // Draw bubbles
+    svg
+      .selectAll("circle")
+      .data(data)
+      .join("circle")
+      .attr("cx", d => x(d.average_rating))
+      .attr("cy", d => y(d.num_ratings))
+      .attr("r", d => size(d.num_reviews))
+      .style("fill", d => color(d.average_rating))
+      .style("opacity", 0.8)
+      .on("mouseover", function (event, d) {
+        tooltip.transition().duration(200).style("opacity", 0.9);
+        tooltip
+          .html(
+            `<strong>${d.title}</strong><br/>
+             Genre: ${d.genre}<br/>
+             Avg Rating: ${d.average_rating}<br/>
+             Ratings: ${d.num_ratings}<br/>
+             Reviews: ${d.num_reviews}`
+          )
+          .style("left", event.pageX + 8 + "px")
+          .style("top", event.pageY - 28 + "px");
+      })
+      .on("mouseout", function () {
+        tooltip.transition().duration(300).style("opacity", 0);
+      });
+  }
+
+  window.addEventListener("resize", () => {
+    updateScene2WithYears(startYear, endYear);
   });
 })();
 
@@ -440,6 +480,7 @@
   });
 
 })();
+
 
 
 
