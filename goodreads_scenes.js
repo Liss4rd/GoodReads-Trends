@@ -1,12 +1,72 @@
 // =========================
-// Year Range Slider with D3
+// Shared Variables & Data Loader
+// =========================
+let allData = [];
+let allReviewsData = [];
+let dataLoaded = false;
+
+const minYear = 2000;
+const maxYear = 2024;
+window.startYear = 2005;
+window.endYear = 2020;
+
+function loadDataOnce(callback) {
+  if (dataLoaded) {
+    callback();
+    return;
+  }
+
+  d3.csv("Book_Details.csv").then(data => {
+    const processedGenres = [];
+    data.forEach(d => {
+      let year = null;
+      if (d.publication_info) {
+        const match = d.publication_info.match(/\b(19|20)\d{2}\b/);
+        if (match) year = +match[0];
+      }
+      if (!year || isNaN(year)) return;
+
+      let genres = [];
+      try {
+        genres = JSON.parse(d.genres.replace(/'/g, '"'));
+      } catch (e) {
+        genres = [];
+      }
+
+      genres.forEach(g => {
+        processedGenres.push({
+          year: year,
+          genre: g.trim()
+        });
+      });
+    });
+    allData = processedGenres;
+
+    allReviewsData = data.map(d => {
+      let year = null;
+      if (d.publication_info) {
+        const match = d.publication_info.match(/\b(19|20)\d{2}\b/);
+        if (match) year = +match[0];
+      }
+      return {
+        title: d.book_title,
+        genre: d.genre || "Unknown",
+        year: year,
+        average_rating: +d.average_rating || 0,
+        num_reviews: +d.num_reviews || 0,
+        num_ratings: +d.num_ratings || 0
+      };
+    }).filter(d => d.year);
+
+    dataLoaded = true;
+    callback();
+  });
+}
+
+// =========================
+// Year Range Slider
 // =========================
 (function () {
-  const minYear = 2000;
-  const maxYear = 2024;
-  window.startYear = 2005;
-  window.endYear = 2020;
-
   const width = 1000;
   const height = 80;
 
@@ -28,7 +88,6 @@
     .attr("transform", `translate(0, ${height / 2 + 20})`)
     .call(axis);
 
-  // Track line
   svg.append("line")
     .attr("class", "track")
     .attr("x1", x(minYear))
@@ -36,7 +95,6 @@
     .attr("y1", height / 2)
     .attr("y2", height / 2);
 
-  // Fill line between thumbs
   const fillLine = svg.append("line")
     .attr("class", "track-fill")
     .attr("x1", x(startYear))
@@ -44,7 +102,6 @@
     .attr("y1", height / 2)
     .attr("y2", height / 2);
 
-  // Start thumb
   const thumbStart = svg.append("circle")
     .attr("class", "thumb")
     .attr("r", 8)
@@ -52,7 +109,6 @@
     .attr("cy", height / 2)
     .call(d3.drag().on("drag", draggedStart));
 
-  // End thumb
   const thumbEnd = svg.append("circle")
     .attr("class", "thumb")
     .attr("r", 8)
@@ -83,403 +139,156 @@
     d3.select("#yearStart").text(startYear);
     d3.select("#yearEnd").text(endYear);
 
-    updateScene1WithYears(startYear, endYear);
-  }
-
-  // =============================
-  // Scene 1: Genre Timeline Chart
-  // =============================
-  let allData = [];
-
-  d3.csv("Book_Details.csv").then(data => {
-    const processed = [];
-
-    data.forEach(d => {
-      let year = null;
-
-      if (d.publication_info) {
-        const match = d.publication_info.match(/\b(19|20)\d{2}\b/);
-        if (match) {
-          year = +match[0];
-        }
-      }
-      if (!year || isNaN(year)) return;
-
-      let genres = [];
-      try {
-        genres = JSON.parse(d.genres.replace(/'/g, '"'));
-      } catch (e) {
-        genres = [];
-      }
-
-      genres.forEach(g => {
-        processed.push({
-          year: year,
-          genre: g.trim()
-        });
-      });
-    });
-
-    allData = processed;
-    updateScene1WithYears(startYear, endYear);
-  });
-
-  function updateScene1WithYears(startYear, endYear) {
-    const filtered = allData.filter(d => d.year >= startYear && d.year <= endYear);
-
-    const topGenres = Array.from(
-      d3.rollup(filtered, v => v.length, d => d.genre),
-      ([genre, total]) => ({ genre, total })
-    )
-      .sort((a, b) => d3.descending(a.total, b.total))
-      .slice(0, 5)
-      .map(d => d.genre);
-
-    const nested = topGenres.map(genre => ({
-      genre,
-      values: Array.from(
-        d3.rollup(
-          filtered.filter(d => d.genre === genre),
-          v => v.length,
-          d => d.year
-        ),
-        ([year, count]) => ({ year: +year, count, genre })
-      ).sort((a, b) => d3.ascending(a.year, b.year))
-    }));
-
-    drawLineChart(nested, topGenres, startYear, endYear);
-  }
-
-  function drawLineChart(nested, topGenres, startYear, endYear) {
-    const margin = { top: 40, right: 220, bottom: 80, left: 80 };
-
-    const containerWidth = document.querySelector("#chart1").clientWidth;
-    const width = containerWidth * 0.8 - margin.left - margin.right;
-
-    const buffer = 10;
-    const bodyMargin = 32;
-    const targetHeight = 792;
-    const availableHeight = window.innerHeight
-      - document.querySelector("header").offsetHeight
-      - document.querySelector(".tab-container").offsetHeight
-      - document.querySelector("#slider-container").offsetHeight
-      - buffer
-      - margin.top
-      - margin.bottom
-      - bodyMargin
-      - 200;
-
-    const height = Math.min(targetHeight, availableHeight);
-
-    d3.select("#chart1").selectAll("*").remove();
-
-    const svg = d3.select("#chart1")
-      .append("svg")
-      .attr("width", width + margin.left + margin.right)
-      .attr("height", height + margin.top + margin.bottom)
-      .append("g")
-      .attr("transform", `translate(${margin.left},${margin.top})`);
-
-    // Tooltip
-    let tooltip = d3.select(".tooltip");
-    if (tooltip.empty()) {
-      tooltip = d3.select("body").append("div")
-      .attr("class", "tooltip")
-      .style("opacity", 0);
+    const activeTab = document.querySelector(".tab-button.active").dataset.tab;
+    if (activeTab === "scene1") {
+      updateScene1WithYears(startYear, endYear);
+    } else if (activeTab === "scene2") {
+      updateScene2WithYears(startYear, endYear);
     }
-    
-    const x = d3.scaleLinear()
-      .domain([startYear, endYear])
-      .range([0, width]);
-
-    const y = d3.scaleLinear()
-      .domain([0, d3.max(nested, g => d3.max(g.values, v => v.count))])
-      .nice()
-      .range([height, 0]);
-
-    const color = d3.scaleOrdinal()
-      .domain(topGenres)
-      .range(d3.schemeTableau10);
-
-    // Axes + Labels
-    svg.append("g")
-      .attr("transform", `translate(0,${height})`)
-      .call(d3.axisBottom(x).tickFormat(d3.format("d")));
-
-    svg.append("text")
-      .attr("x", width / 2)
-      .attr("y", height + 45)
-      .attr("fill", "#000")
-      .attr("text-anchor", "middle")
-      .style("font-size", "16px")
-      .text("Publication Year");
-
-    svg.append("g")
-      .call(d3.axisLeft(y));
-
-    svg.append("text")
-      .attr("x", -height / 2)
-      .attr("y", -60)
-      .attr("transform", "rotate(-90)")
-      .attr("fill", "#000")
-      .attr("text-anchor", "middle")
-      .style("font-size", "16px")
-      .text("Number of Books Published");
-
-    const line = d3.line()
-      .x(d => x(d.year))
-      .y(d => y(d.count))
-      .curve(d3.curveMonotoneX);
-
-    // Draw lines with animation
-    const paths = svg.selectAll(".line")
-      .data(nested)
-      .join("path")
-      .attr("class", "line")
-      .attr("fill", "none")
-      .attr("stroke", d => color(d.genre))
-      .attr("stroke-width", 2.5)
-      .attr("d", d => line(d.values))
-      .style("filter", "drop-shadow(0px 0px 3px rgba(0,0,0,0.3))");
-
-    paths.each(function () {
-      const totalLength = this.getTotalLength();
-      d3.select(this)
-        .attr("stroke-dasharray", totalLength + " " + totalLength)
-        .attr("stroke-dashoffset", totalLength)
-        .transition()
-        .duration(1500)
-        .ease(d3.easeCubic)
-        .attr("stroke-dashoffset", 0);
-    });
-
-    // Points + Tooltips
-    nested.forEach(series => {
-      svg.selectAll(`.point-${series.genre}`)
-        .data(series.values)
-        .join("circle")
-        .attr("cx", d => x(d.year))
-        .attr("cy", d => y(d.count))
-        .attr("r", 4)
-        .attr("fill", color(series.genre))
-        .on("mouseover", function (event, d) {
-          tooltip.transition().duration(200).style("opacity", 0.9);
-          tooltip.html(`<strong>${d.genre}</strong><br/>${d.year}: ${d.count} books`)
-            .style("left", (event.pageX + 8) + "px")
-            .style("top", (event.pageY - 28) + "px");
-        })
-        .on("mouseout", function () {
-          tooltip.transition().duration(300).style("opacity", 0);
-        });
-    });
-
-    // Legend 
-    const legend = svg.selectAll(".legend")
-      .data(topGenres)
-      .join("g")
-      .attr("transform", (d, i) => `translate(${width + 30},${i * 24})`)
-      .on("mouseover", function (event, genre) {
-        svg.selectAll(".line").attr("opacity", d => d.genre === genre ? 1 : 0.1);
-        svg.selectAll("circle").attr("opacity", d => d.genre === genre ? 1 : 0.1);
-      })
-      .on("mouseout", function () {
-        svg.selectAll(".line").attr("opacity", 1);
-        svg.selectAll("circle").attr("opacity", 1);
-      });
-
-    legend.append("rect")
-      .attr("width", 14)
-      .attr("height", 14)
-      .attr("fill", color);
-
-    legend.append("text")
-      .attr("x", 20)
-      .attr("y", 7)
-      .attr("dy", "0.32em")
-      .style("font-size", "14px")
-      .text(d => d);
-  }
-  
- // =========================
-// Scene 2: Popularity vs Quality Bubble Chart
-// =========================
-(function () {
-  let allReviewsData = [];
-
-  d3.csv("Book_Details.csv").then(data => {
-    allReviewsData = data.map(d => {
-      let year = null;
-      if (d.publication_info) {
-        const match = d.publication_info.match(/\b(19|20)\d{2}\b/);
-        if (match) year = +match[0];
-      }
-      return {
-        title: d.book_title,
-        genre: d.genre || "Unknown",
-        year: year,
-        average_rating: +d.average_rating || 0,
-        num_reviews: +d.num_reviews || 0,
-        num_ratings: +d.num_ratings || 0
-      };
-    }).filter(d => d.year);
-
-    updateScene2WithYears(startYear, endYear);
-  });
-
-  window.updateScene2WithYears = function (startYear, endYear) {
-    const filtered = allReviewsData.filter(
-      d => d.year >= startYear && d.year <= endYear
-    );
-
-    drawBubbleChart(filtered);
-  };
-
-  function drawBubbleChart(data) {
-    const margin = { top: 40, right: 40, bottom: 80, left: 80 };
-    const containerWidth = document.querySelector("#chart2").clientWidth;
-    const width = containerWidth * 0.8 - margin.left - margin.right;
-
-    const buffer = 10;
-    const bodyMargin = 32;
-    const targetHeight = 792;
-    const availableHeight =
-      window.innerHeight -
-      document.querySelector("header").offsetHeight -
-      document.querySelector(".tab-container").offsetHeight -
-      document.querySelector("#slider-container").offsetHeight -
-      buffer -
-      margin.top -
-      margin.bottom -
-      bodyMargin -
-      200;
-
-    const height = Math.min(targetHeight, availableHeight);
-
-    d3.select("#chart2").selectAll("*").remove();
-
-    const svg = d3
-      .select("#chart2")
-      .append("svg")
-      .attr("width", width + margin.left + margin.right)
-      .attr("height", height + margin.top + margin.bottom)
-      .append("g")
-      .attr("transform", `translate(${margin.left},${margin.top})`);
-
-    let tooltip = d3.select(".tooltip");
-    if (tooltip.empty()) {
-      tooltip = d3
-        .select("body")
-        .append("div")
-        .attr("class", "tooltip")
-        .style("opacity", 0);
-    }
-
-    const x = d3
-      .scaleLinear()
-      .domain(d3.extent(data, d => d.average_rating))
-      .nice()
-      .range([0, width]);
-
-    const y = d3
-      .scaleLinear()
-      .domain(d3.extent(data, d => d.num_ratings))
-      .nice()
-      .range([height, 0]);
-
-    const size = d3
-      .scaleSqrt()
-      .domain(d3.extent(data, d => d.num_reviews))
-      .range([4, 40]);
-
-    const color = d3.scaleSequential(d3.interpolateBlues)
-      .domain(d3.extent(data, d => d.average_rating));
-
-    // Axes
-    svg
-      .append("g")
-      .attr("transform", `translate(0,${height})`)
-      .call(d3.axisBottom(x));
-
-    svg
-      .append("text")
-      .attr("x", width / 2)
-      .attr("y", height + 45)
-      .attr("fill", "#000")
-      .attr("text-anchor", "middle")
-      .style("font-size", "16px")
-      .text("Average Rating");
-
-    svg.append("g").call(d3.axisLeft(y));
-
-    svg
-      .append("text")
-      .attr("x", -height / 2)
-      .attr("y", -60)
-      .attr("transform", "rotate(-90)")
-      .attr("fill", "#000")
-      .attr("text-anchor", "middle")
-      .style("font-size", "16px")
-      .text("Number of Ratings");
-
-    // Draw bubbles
-    svg
-      .selectAll("circle")
-      .data(data)
-      .join("circle")
-      .attr("cx", d => x(d.average_rating))
-      .attr("cy", d => y(d.num_ratings))
-      .attr("r", d => size(d.num_reviews))
-      .style("fill", d => color(d.average_rating))
-      .style("opacity", 0.8)
-      .on("mouseover", function (event, d) {
-        tooltip.transition().duration(200).style("opacity", 0.9);
-        tooltip
-          .html(
-            `<strong>${d.title}</strong><br/>
-             Genre: ${d.genre}<br/>
-             Avg Rating: ${d.average_rating}<br/>
-             Ratings: ${d.num_ratings}<br/>
-             Reviews: ${d.num_reviews}`
-          )
-          .style("left", event.pageX + 8 + "px")
-          .style("top", event.pageY - 28 + "px");
-      })
-      .on("mouseout", function () {
-        tooltip.transition().duration(300).style("opacity", 0);
-      });
   }
 
-  window.addEventListener("resize", () => {
-    updateScene2WithYears(startYear, endYear);
-  });
-})();
-
-  // =============================
-  // Tab Switcher
-  // =============================
-  document.querySelectorAll(".tab-button").forEach(btn => {
-    btn.addEventListener("click", () => {
-      document.querySelectorAll(".tab-button").forEach(b => b.classList.remove("active"));
-      btn.classList.add("active");
-
-      document.querySelectorAll(".tab-content").forEach(tc => tc.classList.add("hidden"));
-      const tabId = btn.dataset.tab;
-      document.getElementById(tabId).classList.remove("hidden");
-
-      if (tabId === "scene2") {
-        d3.select("#chart2").selectAll("*").remove();
-        loadScene2();
-      }
-    });
-  });
+  window.addEventListener("resize", () => update());
 
   update();
-
-  window.addEventListener("resize", () => {
-    updateScene1WithYears(startYear, endYear);
-  });
-
 })();
+
+// =============================
+// Scene 1
+// =============================
+function updateScene1WithYears(startYear, endYear) {
+  const filtered = allData.filter(d => d.year >= startYear && d.year <= endYear);
+
+  const svg = d3.select("#chart1")
+    .attr("width", 900)
+    .attr("height", 400);
+  svg.selectAll("*").remove();
+
+  const margin = { top: 30, right: 30, bottom: 50, left: 60 },
+        width = +svg.attr("width") - margin.left - margin.right,
+        height = +svg.attr("height") - margin.top - margin.bottom;
+
+  const g = svg.append("g")
+    .attr("transform", `translate(${margin.left},${margin.top})`);
+
+  const x = d3.scaleLinear()
+    .domain(d3.extent(filtered, d => d.year))
+    .range([0, width]);
+
+  const y = d3.scaleLinear()
+    .domain([0, d3.max(filtered, d => d.count)])
+    .nice()
+    .range([height, 0]);
+
+  const line = d3.line()
+    .x(d => x(d.year))
+    .y(d => y(d.count));
+
+  g.append("path")
+    .datum(filtered)
+    .attr("fill", "none")
+    .attr("stroke", "#ff9900")
+    .attr("stroke-width", 2)
+    .attr("d", line);
+
+  g.append("g")
+    .attr("transform", `translate(0,${height})`)
+    .call(d3.axisBottom(x).tickFormat(d3.format("d")));
+
+  g.append("g")
+    .call(d3.axisLeft(y));
+
+  svg.append("text")
+    .attr("x", width / 2 + margin.left)
+    .attr("y", 20)
+    .attr("text-anchor", "middle")
+    .style("font-size", "18px")
+    .text("Literary Genre Timeline");
+}
+
+// =============================
+// Scene 2
+// =============================
+function updateScene2WithYears(startYear, endYear) {
+  const filtered = allReviewsData.filter(d => d.year >= startYear && d.year <= endYear);
+
+  const svg = d3.select("#chart2")
+    .attr("width", 900)
+    .attr("height", 400);
+  svg.selectAll("*").remove();
+
+  const margin = { top: 30, right: 30, bottom: 50, left: 60 },
+        width = +svg.attr("width") - margin.left - margin.right,
+        height = +svg.attr("height") - margin.top - margin.bottom;
+
+  const g = svg.append("g")
+    .attr("transform", `translate(${margin.left},${margin.top})`);
+
+  const x = d3.scaleLinear()
+    .domain(d3.extent(filtered, d => d.year))
+    .range([0, width]);
+
+  const y = d3.scaleLinear()
+    .domain([0, d3.max(filtered, d => d.likes)])
+    .nice()
+    .range([height, 0]);
+
+  const r = d3.scaleSqrt()
+    .domain([0, d3.max(filtered, d => d.reviewCount)])
+    .range([3, 30]);
+
+  g.selectAll("circle")
+    .data(filtered)
+    .enter()
+    .append("circle")
+    .attr("cx", d => x(d.year))
+    .attr("cy", d => y(d.likes))
+    .attr("r", d => r(d.reviewCount))
+    .attr("fill", "rgba(70, 130, 180, 0.7)")
+    .attr("stroke", "#333");
+
+  g.append("g")
+    .attr("transform", `translate(0,${height})`)
+    .call(d3.axisBottom(x).tickFormat(d3.format("d")));
+
+  g.append("g")
+    .call(d3.axisLeft(y));
+
+  svg.append("text")
+    .attr("x", width / 2 + margin.left)
+    .attr("y", 20)
+    .attr("text-anchor", "middle")
+    .style("font-size", "18px")
+    .text("Popularity & Quality");
+}
+
+// =============================
+// Tab Switcher
+// =============================
+document.querySelectorAll(".tab-button").forEach(btn => {
+  btn.addEventListener("click", () => {
+    document.querySelectorAll(".tab-button").forEach(b => b.classList.remove("active"));
+    btn.classList.add("active");
+
+    document.querySelectorAll(".tab-content").forEach(tc => tc.classList.add("hidden"));
+    const tabId = btn.dataset.tab;
+    document.getElementById(tabId).classList.remove("hidden");
+
+    loadDataOnce(() => {
+      if (tabId === "scene1") {
+        updateScene1WithYears(startYear, endYear);
+      } else if (tabId === "scene2") {
+        updateScene2WithYears(startYear, endYear);
+      }
+    });
+  });
+});
+
+// =============================
+// First Load
+// =============================
+loadDataOnce(() => {
+  updateScene1WithYears(startYear, endYear);
+});
 
 
 
