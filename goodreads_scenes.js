@@ -321,13 +321,6 @@
 
     svg.append("g").attr("transform", `translate(0,${chartHeight - 120})`).call(d3.axisBottom(x));
     svg.append("g").call(d3.axisLeft(y));
-
-    svg.append("text")
-      .attr("x", (chartWidth - 300) / 2)
-      .attr("y", -10)
-      .attr("text-anchor", "middle")
-      .style("font-size", "16px")
-      .text("Scene 2 Placeholder");
   }
 
   // =============================
@@ -356,6 +349,7 @@
   });
 
 })();
+
 
 
 
