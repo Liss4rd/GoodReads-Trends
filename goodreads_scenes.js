@@ -159,15 +159,16 @@
     const viewportHeight = window.innerHeight;
     const headerHeight = document.querySelector("header").offsetHeight;
     const tabsHeight = document.querySelector(".tab-container").offsetHeight;
-    const extraSpace = 40;
-    const minHeight = 400;
 
-    const height = Math.max(
-      viewportHeight - headerHeight - tabsHeight - extraSpace - margin.top - margin.bottom,
-      minHeight
-    );
-
-    d3.select("#chart1").selectAll("*").remove();
+    const buffer = 10; 
+    const height = viewportHeight 
+      - headerHeight 
+      - tabsHeight 
+      - document.querySelector("#slider-container").offsetHeight 
+      - buffer 
+      - margin.top 
+      - margin.bottom;
+        d3.select("#chart1").selectAll("*").remove();
 
     const svg = d3.select("#chart1")
       .append("svg")
@@ -300,3 +301,4 @@
   });
 
 })();
+
