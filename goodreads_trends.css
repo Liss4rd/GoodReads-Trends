@@ -80,7 +80,7 @@ h2 {
   font-weight: bold;
   color: #444;
   text-align: center; 
-  margin-bottom: 2px;
+  margin-bottom: 0px;
 }
 
 #slider-container {
@@ -90,7 +90,7 @@ h2 {
 }
 
 #yearSlider {
-  margin-top: 5px;
+  margin-top: 0px;
 }
 
 .track {
@@ -133,3 +133,4 @@ h2 {
 .line {
   transition: opacity 0.3s ease;
 }
+
