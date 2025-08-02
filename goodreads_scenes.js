@@ -308,6 +308,27 @@
 
 })();
 
+function loadScene2() {
+  const chart1SVG = document.querySelector("#chart1 svg");
+  let width = 800, height = 400;
+
+  if (chart1SVG) {
+    width = chart1SVG.getAttribute("width");
+    height = chart1SVG.getAttribute("height");
+  }
+
+  const svg = d3.select("#chart2")
+    .append("svg")
+    .attr("width", width)
+    .attr("height", height);
+
+  svg.append("text")
+    .attr("x", 50)
+    .attr("y", 50)
+    .text("Scene 2 chart will go here")
+    .attr("font-size", "20px");
+}
+
 // =============================
 // Tab Switching Logic
 // =============================
@@ -346,6 +367,7 @@ function loadScene2() {
         .text("Scene 2 chart will go here")
         .attr("font-size", "20px");
 }
+
 
 
 
