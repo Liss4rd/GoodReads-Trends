@@ -91,6 +91,7 @@ h2 {
   font-weight: bold;
   color: #444;
   text-align: center; 
+  width: 100%;
   margin: 0;
 }
 
@@ -144,6 +145,7 @@ h2 {
 .line {
   transition: opacity 0.3s ease;
 }
+
 
 
 
