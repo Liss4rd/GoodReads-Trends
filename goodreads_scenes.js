@@ -163,7 +163,8 @@
       - document.querySelector("#slider-container").offsetHeight
       - buffer
       - margin.top
-      - margin.bottom;
+      - margin.bottom
+      - 10;
 
     d3.select("#chart1").selectAll("*").remove();
 
@@ -301,6 +302,7 @@
   });
 
 })();
+
 
 
 
