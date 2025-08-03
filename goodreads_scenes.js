@@ -289,13 +289,9 @@
         .on("mouseout", function () {
           tooltip.transition().duration(300).style("opacity", 0);
         });
-
     });
 
-
-
     // Legend 
-
     const legend = svg.selectAll(".legend")
       .data(topGenres)
       .join("g")
@@ -444,6 +440,7 @@ document.querySelectorAll(".tab-button").forEach(btn => {
     });
   }); 
 })();
+
 
 
 
