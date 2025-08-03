@@ -589,10 +589,11 @@ function drawScene3BarChart(data) {
       .attr("height", y.bandwidth())
       .attr("preserveAspectRatio", "xMidYMid slice");
 
+    // Create unique color scale for Scene 3
     const scene3Color = d3.scaleOrdinal()
       .domain(sortedData.map(d => d.book_title))
-      .range(d3.schemeTableau10.concat(d3.schemeSet3));
-  
+      .range(d3.schemeTableau10.concat(d3.schemeSet3)); // more colors to reduce repeats
+    
     // Bars
     svg.selectAll(".bar")
       .data(sortedData)
@@ -602,7 +603,7 @@ function drawScene3BarChart(data) {
       .attr("y", d => y(d.rank))
       .attr("width", d => x(d.review_count))
       .attr("height", y.bandwidth())
-      .attr("fill", d => state.genreColor(d.book_title))
+      .attr("fill", d => scene3Color(d.book_title))
       .on("mouseover", (event, d) => {
         tooltip.transition().duration(200).style("opacity", 1);
         tooltip.html(`
@@ -722,6 +723,7 @@ function drawScene3BarChart(data) {
     });
   });
 })();
+
 
 
 
