@@ -60,9 +60,10 @@ header {
 }
 
 h2 {
-  margin-top: 0;
-  margin-bottom: 0;
+  margin-top: 5px;
+  margin-bottom: 5px;
   color: #444;
+  text-align: center;
 }
 
 .label {
@@ -136,6 +137,7 @@ h2 {
 .line {
   transition: opacity 0.3s ease;
 }
+
 
 
 
