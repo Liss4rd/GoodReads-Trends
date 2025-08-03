@@ -472,169 +472,146 @@ function drawBubbleChart(data) {
   // =========================
   // Scene 3: Genre Exploration
   // =========================
-  
-  // Initialize selectedGenres
   state.selectedGenres = [];
-  
+
   function populateGenreDropdown() {
     const genres = [...new Set(state.allReviewsData.map(d => d.mainGenre))].sort();
     const select = d3.select("#genreSelect");
     select.selectAll("option").remove();
-    
-    // Add placeholder
-    select.append("option")
-      .attr("value", "")
-      .text("Select a genre");
-  
-    // Only show genres not already selected
-    genres.filter(g => !state.selectedGenres.includes(g))
-      .forEach(genre => {
-        select.append("option")
-          .attr("value", genre)
-          .text(genre);
-      });
+    genres.forEach(genre => {
+      select.append("option")
+        .attr("value", genre)
+        .text(genre);
+    });
   }
   
-  // Handle dropdown selection
   d3.select("#genreSelect").on("change", function() {
-    const selected = this.value;
-    if (selected && !state.selectedGenres.includes(selected)) {
-      state.selectedGenres.push(selected);
-      renderSelectedGenres();
+    const genre = this.value;
+    if (genre && !state.selectedGenres.includes(genre)) {
+      state.selectedGenres.push(genre);
+      renderGenreChips();
       updateScene3WithYears();
-      populateGenreDropdown();
     }
-    this.value = ""; // Reset to placeholder
+    this.value = "";
   });
   
   // Render chips
-  function renderSelectedGenres() {
+  function renderGenreChips() {
     const container = d3.select("#selectedGenresContainer");
     container.selectAll(".genre-chip").remove();
   
-    container.selectAll(".genre-chip")
+    const chips = container.selectAll(".genre-chip")
       .data(state.selectedGenres)
       .enter()
       .append("div")
-      .attr("class", "genre-chip")
-      .html(d => `${d} <span class="remove-genre">×</span>`)
-      .on("click", function(event, genre) {
+      .attr("class", "genre-chip");
+  
+    chips.append("span").text(d => d);
+  
+    chips.append("span")
+      .attr("class", "remove-chip")
+      .text("×")
+      .on("click", (event, genre) => {
         state.selectedGenres = state.selectedGenres.filter(g => g !== genre);
-        renderSelectedGenres();
+        renderGenreChips();
         updateScene3WithYears();
-        populateGenreDropdown();
       });
   }
   
+  // Filter & draw chart
   function updateScene3WithYears() {
-    const filtered = state.allReviewsData.filter(d => 
+    if (!state.selectedGenres.length) {
+      d3.select("#chart3").html("<p style='padding:20px;color:#666;'>Select at least one genre to see results.</p>");
+      return;
+    }
+  
+    const filtered = state.allReviewsData.filter(d =>
       d.year >= state.startYear &&
       d.year <= state.endYear &&
-      state.selectedGenres.length > 0 &&
-      state.selectedGenres.some(g => 
-        d.allGenres && d.allGenres.toLowerCase().includes(g.toLowerCase())
+      state.selectedGenres.some(g =>
+        (d.allGenres || "").toLowerCase().includes(g.toLowerCase())
       )
     );
   
-    drawScene3Scatter(filtered);
+    drawScene3BarChart(filtered);
   }
   
-  function drawScene3Scatter(data) {
+  function drawScene3BarChart(data) {
     d3.select("#chart3").selectAll("*").remove();
   
-    const margin = { top: 40, right: 40, bottom: 80, left: 80 };
-    const containerWidth = document.querySelector("#chart3").clientWidth;
-    const width = containerWidth * 0.8 - margin.left - margin.right;
-    
-    const buffer = 10, bodyMargin = 32, targetHeight = 792;
-    const availableHeight = window.innerHeight
-      - document.querySelector("header").offsetHeight
-      - document.querySelector(".tab-container").offsetHeight
-      - buffer - margin.top - margin.bottom - bodyMargin - 200;
-    const height = Math.min(targetHeight, availableHeight);
+    if (!data.length) {
+      d3.select("#chart3").append("p")
+        .style("padding", "20px")
+        .style("color", "#666")
+        .text("No books found for selected genres and year range.");
+      return;
+    }
   
-    const svg = d3.select("#chart3").append("svg")
+    const margin = { top: 40, right: 30, bottom: 40, left: 200 };
+    const width = document.querySelector("#chart3").clientWidth - margin.left - margin.right;
+    const height = Math.min(600, data.length * 25);
+  
+    const svg = d3.select("#chart3")
+      .append("svg")
       .attr("width", width + margin.left + margin.right)
       .attr("height", height + margin.top + margin.bottom)
       .append("g")
       .attr("transform", `translate(${margin.left},${margin.top})`);
   
+    // Sort & limit to top 20
+    const sortedData = data.sort((a, b) => d3.descending(a.review_count, b.review_count)).slice(0, 20);
+  
+    const y = d3.scaleBand()
+      .domain(sortedData.map(d => d.book_title))
+      .range([0, height])
+      .padding(0.1);
+  
     const x = d3.scaleLinear()
-      .domain([0, 5])
+      .domain([0, d3.max(sortedData, d => d.review_count)])
+      .nice()
       .range([0, width]);
   
-    const y = d3.scaleLinear()
-      .domain([0, d3.max(data, d => d.review_count) || 1])
-      .range([height, 0]);
-  
-    const size = d3.scaleSqrt()
-      .domain([0, d3.max(data, d => d.fiveStarCount) || 1])
-      .range([2, 40]);
-  
-    // Axes
-    svg.append("g")
-      .attr("transform", `translate(0,${height})`)
-      .call(d3.axisBottom(x));
-  
-    svg.append("g")
-      .call(d3.axisLeft(y));
-  
-    // Labels
-    svg.append("text")
-      .attr("x", width / 2)
-      .attr("y", height + 50)
-      .attr("text-anchor", "middle")
-      .style("font-size", "16px")
-      .style("fill", "#000")
-      .text("Average Rating");
-  
-    svg.append("text")
-      .attr("transform", "rotate(-90)")
-      .attr("x", -height / 2)
-      .attr("y", -margin.left + 20)
-      .attr("text-anchor", "middle")
-      .style("font-size", "16px")
-      .style("fill", "#000")
-      .text("Number of Reviews");
-
-    // Tooltip
-    const tooltip = d3.select("body").append("div")
-      .attr("class", "tooltip")
-      .style("opacity", 0)
-      .style("position", "absolute")
-      .style("background", "#fff")
-      .style("border", "1px solid #ccc")
-      .style("padding", "8px")
-      .style("border-radius", "4px")
-      .style("pointer-events", "none");
-    
-    // Bubbles
-    svg.selectAll("circle")
-      .data(data)
-      .join("circle")
-      .attr("cx", d => x(d.average_rating))
-      .attr("cy", d => y(d.review_count))
-      .attr("r", d => size(d.fiveStarCount))
+    // Bars
+    svg.selectAll(".bar")
+      .data(sortedData)
+      .enter()
+      .append("rect")
+      .attr("class", "bar")
+      .attr("y", d => y(d.book_title))
+      .attr("width", d => x(d.review_count))
+      .attr("height", y.bandwidth())
       .attr("fill", d => state.genreColor(d.mainGenre))
-      .attr("opacity", 0.7)
-      .attr("stroke", "#333")
       .on("mouseover", (event, d) => {
         tooltip.transition().duration(200).style("opacity", 1);
-        tooltip.html(`<strong>${d.book_title || "Unknown Title"}</strong>`)
-          .style("left", `${event.pageX + 10}px`)
-          .style("top", `${event.pageY - 28}px`);
-      })
-      .on("mousemove", (event) => {
-        tooltip.style("left", `${event.pageX + 10}px`)
-               .style("top", `${event.pageY - 28}px`);
+        tooltip.html(`
+          <strong>${d.book_title}</strong><br/>
+          Author: ${d.author}<br/>
+          Avg Rating: ${d.average_rating}<br/>
+          Reviews: ${d.review_count}<br/>
+          Genres: ${d.allGenres}
+        `)
+        .style("left", `${event.pageX + 10}px`)
+        .style("top", `${event.pageY - 28}px`);
       })
       .on("mouseout", () => {
         tooltip.transition().duration(200).style("opacity", 0);
       })
       .on("click", (event, d) => showBookPopup(d));
+  
+    // Axes
+    svg.append("g").call(d3.axisLeft(y).tickSize(0).tickPadding(6));
+    svg.append("g").attr("transform", `translate(0,${height})`).call(d3.axisBottom(x));
+  
+    // Tooltip
+    let tooltip = d3.select("body").selectAll(".tooltip").data([null]);
+    tooltip = tooltip.enter()
+      .append("div")
+      .attr("class", "tooltip")
+      .style("opacity", 0)
+      .merge(tooltip);
   }
-      
-  // Popup for clicked book
+  
+  // Popup
   function showBookPopup(d) {
     const popup = d3.select("#bookPopup");
     popup.html(`
@@ -653,11 +630,11 @@ function drawBubbleChart(data) {
       popup.classed("hidden", true);
     });
   }
-    
-  d3.select("#genreSelect").on("change", function() {
-    state.selectedGenres = Array.from(this.selectedOptions).map(o => o.value);
-    updateScene3WithYears();
-  });
+      
+    d3.select("#genreSelect").on("change", function() {
+      state.selectedGenres = Array.from(this.selectedOptions).map(o => o.value);
+      updateScene3WithYears();
+    });
 
   // =============================
   // Tab Switcher
@@ -706,6 +683,7 @@ function drawBubbleChart(data) {
     });
   });
 })();
+
 
 
 
