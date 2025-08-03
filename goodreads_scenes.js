@@ -492,7 +492,6 @@ function drawBubbleChart(data) {
       renderGenreChips();
       updateScene3WithYears();
     }
-    this.value = "";
   });
   
   // Render chips
@@ -725,6 +724,7 @@ function drawScene3BarChart(data) {
     });
   });
 })();
+
 
 
 
