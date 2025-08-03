@@ -303,151 +303,105 @@
  // =========================
 // Scene 2: Popularity vs Quality Bubble Chart
 // =========================
-(function () {
-  let allReviewsData = [];
+function updateScene2WithYears(startYear, endYear) {
+  const filtered = allReviewsData.filter(d => 
+    d.year >= startYear && d.year <= endYear
+  );
 
-  d3.csv("Book_Details.csv").then(data => {
-    allReviewsData = data.map(d => {
-      let year = null;
-      if (d.publication_info) {
-        const match = d.publication_info.match(/\b(19|20)\d{2}\b/);
-        if (match) year = +match[0];
-      }
-      return {
-        title: d.book_title,
-        genre: d.genre || "Unknown",
-        year: year,
-        average_rating: +d.average_rating || 0,
-        num_reviews: +d.num_reviews || 0,
-        num_ratings: +d.num_ratings || 0
-      };
-    }).filter(d => d.year);
+  d3.select("#chart2").selectAll("*").remove();
 
-    updateScene2WithYears(startYear, endYear);
+  const svg = d3.select("#chart2")
+    .append("svg")
+    .attr("width", 900)
+    .attr("height", 500);
+
+  drawBubbleChart(svg, filtered);
+}
+
+function drawBubbleChart(svg, data) {
+  const width = +svg.attr("width");
+  const height = +svg.attr("height");
+  const margin = { top: 40, right: 40, bottom: 60, left: 60 };
+
+  data.forEach(d => {
+    d.average_rating = +d.average_rating || 0;
+    d.review_count = +d.review_count || 0;
+    d.likes_on_review = +d.likes_on_review || 0;
   });
 
-  window.updateScene2WithYears = function (startYear, endYear) {
-    const filtered = allReviewsData.filter(
-      d => d.year >= startYear && d.year <= endYear
-    );
+  // Scales
+  const x = d3.scaleLinear()
+    .domain([0, 5]) // ratings are 0-5
+    .range([margin.left, width - margin.right]);
 
-    drawBubbleChart(filtered);
-  };
+  const y = d3.scaleLinear()
+    .domain([0, d3.max(data, d => d.review_count) || 1])
+    .range([height - margin.bottom, margin.top]);
 
-  function drawBubbleChart(data) {
-    const margin = { top: 40, right: 40, bottom: 80, left: 80 };
-    const containerWidth = document.querySelector("#chart2").clientWidth;
-    const width = containerWidth * 0.8 - margin.left - margin.right;
+  const size = d3.scaleSqrt()
+    .domain([0, d3.max(data, d => d.likes_on_review) || 1])
+    .range([2, 40]);
 
-    const buffer = 10;
-    const bodyMargin = 32;
-    const targetHeight = 792;
-    const availableHeight =
-      window.innerHeight -
-      document.querySelector("header").offsetHeight -
-      document.querySelector(".tab-container").offsetHeight -
-      document.querySelector("#slider-container").offsetHeight -
-      buffer -
-      margin.top -
-      margin.bottom -
-      bodyMargin -
-      200;
+  const color = d3.scaleOrdinal(d3.schemeTableau10);
 
-    const height = Math.min(targetHeight, availableHeight);
+  svg.append("g")
+    .attr("transform", `translate(0,${height - margin.bottom})`)
+    .call(d3.axisBottom(x));
 
-    d3.select("#chart2").selectAll("*").remove();
+  svg.append("g")
+    .attr("transform", `translate(${margin.left},0)`)
+    .call(d3.axisLeft(y));
 
-    const svg = d3
-      .select("#chart2")
-      .append("svg")
-      .attr("width", width + margin.left + margin.right)
-      .attr("height", height + margin.top + margin.bottom)
-      .append("g")
-      .attr("transform", `translate(${margin.left},${margin.top})`);
+  svg.append("text")
+    .attr("x", width / 2)
+    .attr("y", height - 15)
+    .attr("text-anchor", "middle")
+    .text("Average Rating");
 
-    let tooltip = d3.select(".tooltip");
-    if (tooltip.empty()) {
-      tooltip = d3
-        .select("body")
-        .append("div")
+  svg.append("text")
+    .attr("transform", "rotate(-90)")
+    .attr("x", -height / 2)
+    .attr("y", 15)
+    .attr("text-anchor", "middle")
+    .text("Number of Reviews");
+
+  svg.selectAll("circle")
+    .data(data)
+    .join("circle")
+    .attr("cx", d => x(d.average_rating))
+    .attr("cy", d => y(d.review_count))
+    .attr("r", d => size(d.likes_on_review))
+    .attr("fill", d => color(d.genre || "Other"))
+    .attr("opacity", 0.7)
+    .attr("stroke", "#333")
+    .on("mouseover", (event, d) => {
+      d3.select(event.currentTarget)
+        .attr("stroke", "black")
+        .attr("stroke-width", 2);
+
+      const tooltip = d3.select("body").append("div")
         .attr("class", "tooltip")
-        .style("opacity", 0);
-    }
-
-    const x = d3
-      .scaleLinear()
-      .domain(d3.extent(data, d => d.average_rating))
-      .nice()
-      .range([0, width]);
-
-    const y = d3
-      .scaleLinear()
-      .domain(d3.extent(data, d => d.num_ratings))
-      .nice()
-      .range([height, 0]);
-
-    const size = d3
-      .scaleSqrt()
-      .domain(d3.extent(data, d => d.num_reviews))
-      .range([4, 40]);
-
-    const color = d3.scaleSequential(d3.interpolateBlues)
-      .domain(d3.extent(data, d => d.average_rating));
-
-    // Axes
-    svg
-      .append("g")
-      .attr("transform", `translate(0,${height})`)
-      .call(d3.axisBottom(x));
-
-    svg
-      .append("text")
-      .attr("x", width / 2)
-      .attr("y", height + 45)
-      .attr("fill", "#000")
-      .attr("text-anchor", "middle")
-      .style("font-size", "16px")
-      .text("Average Rating");
-
-    svg.append("g").call(d3.axisLeft(y));
-
-    svg
-      .append("text")
-      .attr("x", -height / 2)
-      .attr("y", -60)
-      .attr("transform", "rotate(-90)")
-      .attr("fill", "#000")
-      .attr("text-anchor", "middle")
-      .style("font-size", "16px")
-      .text("Number of Ratings");
-
-    // Draw bubbles
-    svg
-      .selectAll("circle")
-      .data(data)
-      .join("circle")
-      .attr("cx", d => x(d.average_rating))
-      .attr("cy", d => y(d.num_ratings))
-      .attr("r", d => size(d.num_reviews))
-      .style("fill", d => color(d.average_rating))
-      .style("opacity", 0.8)
-      .on("mouseover", function (event, d) {
-        tooltip.transition().duration(200).style("opacity", 0.9);
-        tooltip
-          .html(
-            `<strong>${d.title}</strong><br/>
-             Genre: ${d.genre}<br/>
-             Avg Rating: ${d.average_rating}<br/>
-             Ratings: ${d.num_ratings}<br/>
-             Reviews: ${d.num_reviews}`
-          )
-          .style("left", event.pageX + 8 + "px")
-          .style("top", event.pageY - 28 + "px");
-      })
-      .on("mouseout", function () {
-        tooltip.transition().duration(300).style("opacity", 0);
-      });
-  }
+        .style("position", "absolute")
+        .style("background", "white")
+        .style("border", "1px solid #ccc")
+        .style("padding", "5px")
+        .html(`
+          <strong>${d.book_title || "Unknown"}</strong><br/>
+          Rating: ${d.average_rating}<br/>
+          Reviews: ${d.review_count}<br/>
+          Likes: ${d.likes_on_review}
+        `);
+      
+      tooltip.style("left", (event.pageX + 10) + "px")
+             .style("top", (event.pageY - 20) + "px");
+    })
+    .on("mouseout", (event) => {
+      d3.select(event.currentTarget)
+        .attr("stroke", "#333")
+        .attr("stroke-width", 1);
+      d3.selectAll(".tooltip").remove();
+    });
+}
 
   window.addEventListener("resize", () => {
     updateScene2WithYears(startYear, endYear);
@@ -480,6 +434,7 @@
   });
 
 })();
+
 
 
 
