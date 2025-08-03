@@ -224,8 +224,8 @@
         .attr("fill", color(series.genre))
         .style("opacity", 0)
         .transition()
-        .delay(1500 + i * 150) 
-        .duration(500)
+        .delay(500 + i * 150) 
+        .duration(250)
         .style("opacity", 1);
     });
   }
@@ -355,5 +355,6 @@ function drawBubbleChart(data) {
 
   updateSlider();
 })();
+
 
 
