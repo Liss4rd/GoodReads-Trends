@@ -650,10 +650,10 @@ function drawScene3BarChart(data) {
     svg.append("text")
       .attr("transform", "rotate(-90)")
       .attr("x", -height / 2)
-      .attr("y", -margin.left - 30) 
+      .attr("y", -margin.left + 15) 
       .attr("text-anchor", "middle")
       .style("font-size", "14px")
-      .text("Top Ranked Books");
+      .text("Ranking");
   
     // Tooltip
     let tooltip = d3.select("body").selectAll(".tooltip").data([null]);
@@ -731,6 +731,7 @@ function drawScene3BarChart(data) {
     });
   });
 })();
+
 
 
 
