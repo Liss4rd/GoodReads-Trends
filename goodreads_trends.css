@@ -142,6 +142,27 @@ h2 {
 /* =========================
    Genre Selection & Popup
    ========================= */
+#selectedGenresContainer {
+  display: flex;
+  flex-wrap: wrap;
+  margin-top: 6px;
+}
+
+.genre-chip {
+  background: #f4f0ec;
+  border: 1px solid #ccc;
+  border-radius: 14px;
+  padding: 4px 10px;
+  margin: 2px;
+  font-size: 13px;
+  cursor: default;
+}
+
+.genre-chip .remove-genre {
+  cursor: pointer;
+  margin-left: 6px;
+  font-weight: bold;
+}
 
 #genreSelect {
   margin-bottom: 10px;
@@ -175,6 +196,7 @@ h2 {
 .hidden {
   display: none;
 }
+
 
 
 
