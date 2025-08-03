@@ -377,7 +377,9 @@ function drawBubbleChart(data) {
     .domain([0, d3.max(data, d => d.fiveStarCount) || 1])
     .range([2, 40]);
 
-  const color = d3.scaleOrdinal(d3.schemeTableau10);
+  const color = d3.scaleOrdinal()
+    .domain([...new Set(state.allData.map(d => d.genre))]) 
+    .range(d3.schemeTableau10);
   
   svg.append("g")
     .attr("transform", `translate(0,${height - margin.bottom})`)
@@ -450,6 +452,7 @@ document.querySelectorAll(".tab-button").forEach(btn => {
     });
   }); 
 })();
+
 
 
 
