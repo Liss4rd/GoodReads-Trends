@@ -618,6 +618,7 @@ function drawBubbleChart(data) {
     btn.addEventListener("click", () => {
       document.querySelectorAll(".tab-button").forEach(b => b.classList.remove("active"));
       btn.classList.add("active");
+  
       document.querySelectorAll(".tab-content").forEach(tc => tc.classList.add("hidden"));
   
       const tabId = btn.dataset.tab;
@@ -626,6 +627,7 @@ function drawBubbleChart(data) {
       if (tabId === "scene1") {
         updateScene1WithYears();
       }
+  
       if (tabId === "scene2") {
         if (reviewsLoaded) {
           updateScene2WithYears();
@@ -638,25 +640,24 @@ function drawBubbleChart(data) {
           }, 200);
         }
       }
-
-          if (tabId === "scene3") {
-      if (reviewsLoaded) {
-        populateGenreDropdown(); 
-        updateScene3WithYears();  
-      } else {
-        const checkLoaded = setInterval(() => {
-          if (reviewsLoaded) {
-            populateGenreDropdown();
-            updateScene3WithYears();
-            clearInterval(checkLoaded);
-          }
-        }, 200);
+  
+      if (tabId === "scene3") {
+        if (reviewsLoaded) {
+          populateGenreDropdown();
+          updateScene3WithYears();
+        } else {
+          const checkLoaded = setInterval(() => {
+            if (reviewsLoaded) {
+              populateGenreDropdown();
+              updateScene3WithYears();
+              clearInterval(checkLoaded);
+            }
+          }, 200);
+        }
       }
-    }
+    });
   });
-});
-}); 
-})();
+
 
 
 
