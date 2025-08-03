@@ -30,20 +30,33 @@
           fiveStarCount = 0;
         }
       }
-    
+
+      let mainGenre = "Other";
+      if (d.genres) {
+        try {
+          const genreArray = JSON.parse(d.genres.replace(/'/g, '"'));
+          if (Array.isArray(genreArray) && genreArray.length > 0) {
+            mainGenre = genreArray[0];
+          }
+        } catch {
+          mainGenre = d.genres;
+        }
+      }
+      
       return {
         ...d,
         year: year || null,
         average_rating: +d.average_rating || 0,
         review_count: +((d.num_reviews || "").replace(/,/g, "")) || 0,
         fiveStarCount: fiveStarCount,
-        genre: d.genres || "Other"
+        mainGenre: mainGenre,     
+        allGenres: d.genres || ""
       };
     }).filter(d => d.year);
 
       if (!state.genreColor) {
         state.genreColor = d3.scaleOrdinal()
-          .domain([...new Set(state.allReviewsData.map(d => d.genre))])
+          .domain([...new Set(state.allReviewsData.map(d => d.mainGenre))])
           .range(d3.schemeTableau10);
       }
   
@@ -427,15 +440,15 @@ function drawBubbleChart(data) {
     .attr("cx", d => x(d.average_rating))
     .attr("cy", d => y(d.review_count))
     .attr("r", d => size(d.fiveStarCount))
-    .attr("fill", d => color(d.genre || "Other"))
+    .attr("fill", d => color(d.mainGenre || "Other"))
     .attr("opacity", 0.7)
     .attr("stroke", "#333");
 
   // Legend
-  const genres = [...new Set(data.map(d => d.genre))];
+  const legendGenres = [...new Set(data.map(d => d.mainGenre))];
   
   const legend = svg.selectAll(".legend")
-    .data(genres)
+    .data(legendGenres)
     .join("g")
     .attr("class", "legend")
     .attr("transform", (d, i) => `translate(${-margin.left + 10}, ${i * 20})`);
@@ -465,10 +478,10 @@ function drawBubbleChart(data) {
       tooltip.transition().duration(200).style("opacity", 1);
       tooltip.html(`
         <strong>${d.book_title || "Unknown Title"}</strong><br/>
-        Genre: ${d.genre}<br/>
+        Genre(s): ${d.allGenres}<br/> <!-- full list -->
         Avg Rating: ${d.average_rating}<br/>
         Reviews: ${d.review_count}<br/>
-        5★ Ratings: ${d.fiveStarCount}
+        5* Ratings: ${d.fiveStarCount}
       `)
       .style("left", `${event.pageX + 10}px`)
       .style("top", `${event.pageY - 28}px`);
@@ -483,7 +496,7 @@ function drawBubbleChart(data) {
   // =========================
   
   function populateGenreDropdown() {
-    const genres = [...new Set(state.allReviewsData.map(d => d.genre))].sort();
+    const genres = [...new Set(state.allReviewsData.map(d => d.mainGenre))].sort();
     const select = d3.select("#genreSelect");
     select.selectAll("option").remove();
     genres.forEach(genre => {
@@ -501,7 +514,7 @@ function drawBubbleChart(data) {
     const filtered = state.allReviewsData.filter(d => 
       d.year >= state.startYear &&
       d.year <= state.endYear &&
-      d.genre === state.selectedGenre
+      d.mainGenre === state.selectedGenre
     );
   
     drawScene3Scatter(filtered);
@@ -572,7 +585,7 @@ function drawBubbleChart(data) {
       .attr("cx", d => x(d.average_rating))
       .attr("cy", d => y(d.review_count))
       .attr("r", d => size(d.fiveStarCount))
-      .attr("fill", d => state.genreColor(d.genre))
+      .attr("fill", d => state.genreColor(d.mainGenre))
       .attr("opacity", 0.7)
       .attr("stroke", "#333")
       .on("click", (event, d) => showBookPopup(d));
@@ -650,6 +663,7 @@ function drawBubbleChart(data) {
       });
     }); 
   })();
+
 
 
 
