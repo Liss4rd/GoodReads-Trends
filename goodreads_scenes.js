@@ -591,7 +591,7 @@ function drawScene3BarChart(data) {
       .enter()
       .append("image")
       .attr("xlink:href", d => d.cover_image_uri)
-      .attr("x", -y.bandwidth() - 10)
+      .attr("x", -y.bandwidth() - 25)
       .attr("y", d => y(d.rank))
       .attr("width", y.bandwidth())
       .attr("height", y.bandwidth())
@@ -731,6 +731,7 @@ function drawScene3BarChart(data) {
     });
   });
 })();
+
 
 
 
