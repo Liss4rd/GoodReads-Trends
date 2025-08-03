@@ -418,21 +418,34 @@ function drawBubbleChart(data) {
   // =============================
   // Tab Switcher
   // =============================
-  document.querySelectorAll(".tab-button").forEach(btn => {
-    btn.addEventListener("click", () => {
-      document.querySelectorAll(".tab-button").forEach(b => b.classList.remove("active"));
-      btn.classList.add("active");
-      document.querySelectorAll(".tab-content").forEach(tc => tc.classList.add("hidden"));
-      const tabId = btn.dataset.tab;
-      document.getElementById(tabId).classList.remove("hidden");
+document.querySelectorAll(".tab-button").forEach(btn => {
+  btn.addEventListener("click", () => {
+    document.querySelectorAll(".tab-button").forEach(b => b.classList.remove("active"));
+    btn.classList.add("active");
+    document.querySelectorAll(".tab-content").forEach(tc => tc.classList.add("hidden"));
 
-      if (tabId === "scene1") updateScene1WithYears();
-      if (tabId === "scene2") updateScene2WithYears();
-    });
+    const tabId = btn.dataset.tab;
+    document.getElementById(tabId).classList.remove("hidden");
+
+    if (tabId === "scene1") {
+      updateScene1WithYears();
+    }
+    if (tabId === "scene2") {
+      if (reviewsLoaded) {
+        updateScene2WithYears();
+      } else {
+        // Re-run after load finishes
+        const checkLoaded = setInterval(() => {
+          if (reviewsLoaded) {
+            updateScene2WithYears();
+            clearInterval(checkLoaded);
+          }
+        }, 200);
+      }
+    }
   });
+});
 
-  updateSlider();
-})();
 
 
 
