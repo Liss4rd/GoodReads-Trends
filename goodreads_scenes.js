@@ -636,8 +636,8 @@ function drawBubbleChart(data) {
               clearInterval(checkLoaded);
             }
           }, 200);
-          }
         }
+      }
 
           if (tabId === "scene3") {
       if (reviewsLoaded) {
@@ -657,6 +657,7 @@ function drawBubbleChart(data) {
 });
 }); 
 })();
+
 
 
 
