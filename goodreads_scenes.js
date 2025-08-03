@@ -7,21 +7,29 @@
     allData: [],
     allReviewsData: []
   };
+
+    let reviewsLoaded = false;
   
   // =========================
-  // Load Scene 2 Data Immediately
+  // Load Scene 2 Data
   // =========================
-  let reviewsLoaded = false;
-  
   d3.csv("Book_Reviews.csv").then(data => {
-    state.allReviewsData = data.map(d => ({
-      ...d,
-      year: +d.year || null,
-      average_rating: +d.average_rating || 0,
-      review_count: +d.review_count || 0,
-      likes_on_review: +d.likes_on_review || 0,
-      genre: d.genre || "Other"
-    })).filter(d => d.year);
+    state.allReviewsData = data.map(d => {
+      let year = null;
+      if (d.publication_info) {
+        const match = d.publication_info.match(/\b(19|20)\d{2}\b/);
+        if (match) year = +match[0];
+      }
+  
+      return {
+        ...d,
+        year: year || null,
+        average_rating: +d.average_rating || 0,
+        review_count: +d.review_count || 0,
+        likes_on_review: +d.likes_on_review || 0,
+        genre: d.genre || "Other"
+      };
+    }).filter(d => d.year);
   
     reviewsLoaded = true;
   });
@@ -359,6 +367,7 @@ function drawBubbleChart(data) {
 
   updateSlider();
 })();
+
 
 
 
