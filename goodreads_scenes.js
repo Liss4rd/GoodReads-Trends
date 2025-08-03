@@ -492,7 +492,7 @@ function drawBubbleChart(data) {
     const filtered = state.allReviewsData.filter(d => 
       d.year >= state.startYear &&
       d.year <= state.endYear &&
-      d.mainGenre === state.selectedGenre
+      d.allGenres.toLowerCase().includes(state.selectedGenre.toLowerCase())
     );
   
     drawScene3Scatter(filtered);
@@ -658,6 +658,7 @@ function drawBubbleChart(data) {
     });
   });
 })();
+
 
 
 
