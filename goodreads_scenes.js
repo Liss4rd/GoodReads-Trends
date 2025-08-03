@@ -215,52 +215,112 @@
     });
   }
 
-  // =========================
-  // Scene 2: Popularity & Quality
-  // =========================
-  d3.csv("Book_Reviews.csv").then(data => {
-    state.allReviewsData = data.map(d => ({
+// =========================
+// Scene 2: Popularity & Quality
+// =========================
+let reviewsLoaded = false;
+
+d3.csv("Book_Reviews.csv").then(data => {
+  state.allReviewsData = data
+    .map(d => ({
       ...d,
       year: +d.year || null,
       average_rating: +d.average_rating || 0,
       review_count: +d.review_count || 0,
-      likes_on_review: +d.likes_on_review || 0
-    }));
-  });
+      likes_on_review: +d.likes_on_review || 0,
+      genre: d.genre || "Other"
+    }))
+    .filter(d => d.year); 
 
-  function updateScene2WithYears() {
-    const filtered = state.allReviewsData.filter(d => d.year >= state.startYear && d.year <= state.endYear);
-    d3.select("#chart2").selectAll("*").remove();
-    drawBubbleChart(filtered);
+  reviewsLoaded = true;
+});
+
+function updateScene2WithYears() {
+  if (!reviewsLoaded) {
+    console.warn("Scene 2 data not loaded yet.");
+    return;
   }
 
-  function drawBubbleChart(data) {
-    const svg = d3.select("#chart2").append("svg")
-      .attr("width", 900)
-      .attr("height", 500);
+  const filtered = state.allReviewsData.filter(
+    d => d.year >= state.startYear && d.year <= state.endYear
+  );
 
-    const width = +svg.attr("width");
-    const height = +svg.attr("height");
-    const margin = { top: 40, right: 40, bottom: 60, left: 60 };
+  d3.select("#chart2").selectAll("*").remove();
 
-    const x = d3.scaleLinear().domain([0, 5]).range([margin.left, width - margin.right]);
-    const y = d3.scaleLinear().domain([0, d3.max(data, d => d.review_count) || 1]).range([height - margin.bottom, margin.top]);
-    const size = d3.scaleSqrt().domain([0, d3.max(data, d => d.likes_on_review) || 1]).range([2, 40]);
-    const color = d3.scaleOrdinal(d3.schemeTableau10);
-
-    svg.append("g").attr("transform", `translate(0,${height - margin.bottom})`).call(d3.axisBottom(x));
-    svg.append("g").attr("transform", `translate(${margin.left},0)`).call(d3.axisLeft(y));
-
-    svg.selectAll("circle")
-      .data(data)
-      .join("circle")
-      .attr("cx", d => x(d.average_rating))
-      .attr("cy", d => y(d.review_count))
-      .attr("r", d => size(d.likes_on_review))
-      .attr("fill", d => color(d.genre || "Other"))
-      .attr("opacity", 0.7)
-      .attr("stroke", "#333");
+  if (filtered.length === 0) {
+    d3.select("#chart2").append("div")
+      .style("padding", "20px")
+      .style("color", "#666")
+      .style("text-align", "center")
+      .text("No data available for this year range.");
+    return;
   }
+
+  drawBubbleChart(filtered);
+}
+
+function drawBubbleChart(data) {
+  const svg = d3.select("#chart2").append("svg")
+    .attr("width", 900)
+    .attr("height", 500);
+
+  const width = +svg.attr("width");
+  const height = +svg.attr("height");
+  const margin = { top: 40, right: 40, bottom: 60, left: 60 };
+
+  const x = d3.scaleLinear()
+    .domain([0, 5])
+    .range([margin.left, width - margin.right]);
+
+  const y = d3.scaleLinear()
+    .domain([0, d3.max(data, d => d.review_count) || 1])
+    .range([height - margin.bottom, margin.top]);
+
+  const size = d3.scaleSqrt()
+    .domain([0, d3.max(data, d => d.likes_on_review) || 1])
+    .range([2, 40]);
+
+  const color = d3.scaleOrdinal(d3.schemeTableau10);
+  
+  svg.append("g")
+    .attr("transform", `translate(0,${height - margin.bottom})`)
+    .call(d3.axisBottom(x));
+
+  svg.append("g")
+    .attr("transform", `translate(${margin.left},0)`)
+    .call(d3.axisLeft(y));
+
+  svg.selectAll("circle")
+    .data(data)
+    .join("circle")
+    .attr("cx", d => x(d.average_rating))
+    .attr("cy", d => y(d.review_count))
+    .attr("r", d => size(d.likes_on_review))
+    .attr("fill", d => color(d.genre || "Other"))
+    .attr("opacity", 0.7)
+    .attr("stroke", "#333");
+
+  const tooltip = d3.select("body").append("div")
+    .attr("class", "tooltip")
+    .style("opacity", 0);
+
+  svg.selectAll("circle")
+    .on("mouseover", (event, d) => {
+      tooltip.transition().duration(200).style("opacity", 1);
+      tooltip.html(`
+        <strong>${d.title || "Unknown Title"}</strong><br/>
+        Genre: ${d.genre}<br/>
+        Avg Rating: ${d.average_rating}<br/>
+        Reviews: ${d.review_count}<br/>
+        Likes: ${d.likes_on_review}
+      `)
+      .style("left", `${event.pageX + 10}px`)
+      .style("top", `${event.pageY - 28}px`);
+    })
+    .on("mouseout", () => {
+      tooltip.transition().duration(300).style("opacity", 0);
+    });
+}
 
   // =============================
   // Tab Switcher
@@ -280,3 +340,4 @@
 
   updateSlider();
 })();
+
