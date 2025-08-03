@@ -213,22 +213,22 @@
           .ease(d3.easeCubic)
           .attr("stroke-dashoffset", 0);
       });
-
-    nested.forEach((series, i) => {
-      svg.selectAll(`.point-${series.genre}`)
-        .data(series.values)
-        .join("circle")
-        .attr("cx", d => x(d.year))
-        .attr("cy", d => y(d.count))
-        .attr("r", 4)
-        .attr("fill", color(series.genre))
-        .style("opacity", 0)
-        .transition()
-        .delay(500 + i * 150) 
-        .duration(250)
-        .style("opacity", 1);
-    });
-  }
+      
+      nested.forEach((series, i) => {
+        svg.selectAll(`.point-${series.genre}`)
+          .data(series.values)
+          .join("circle")
+          .attr("cx", d => x(d.year))
+          .attr("cy", d => y(d.count))
+          .attr("r", 4)
+          .attr("fill", color(series.genre))
+          .style("opacity", 0)
+          .transition()
+          .delay(1500 + i * 150) 
+          .duration(400)
+          .style("opacity", 1);
+      });
+        }
 
 // =========================
 // Scene 2: Popularity & Quality
@@ -355,6 +355,7 @@ function drawBubbleChart(data) {
 
   updateSlider();
 })();
+
 
 
 
