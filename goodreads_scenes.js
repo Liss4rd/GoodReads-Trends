@@ -657,11 +657,6 @@ function drawScene3BarChart(data) {
       popup.classed("hidden", true);
     });
   }
-      
-    d3.select("#genreSelect").on("change", function() {
-      state.selectedGenres = Array.from(this.selectedOptions).map(o => o.value);
-      updateScene3WithYears();
-    });
 
   // =============================
   // Tab Switcher
@@ -710,6 +705,7 @@ function drawScene3BarChart(data) {
     });
   });
 })();
+
 
 
 
