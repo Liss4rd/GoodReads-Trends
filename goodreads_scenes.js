@@ -602,7 +602,7 @@ function drawBubbleChart(data) {
     popup.html(`
       <img src="${d.cover_image_uri}" alt="Cover of ${d.book_title}">
       <h3>${d.book_title}</h3>
-      <p><strong>Author:</strong> ${d.author}</p>
+      <p><strong>Author:</strong> <a href="${d.authorlink}" target="_blank">${d.author}</a></p>
       <p><strong>Average Rating:</strong> ${d.average_rating}</p>
       <p><strong>Reviews:</strong> ${d.review_count}</p>
       <p><strong>5★ Ratings:</strong> ${d.fiveStarCount}</p>
@@ -650,6 +650,7 @@ function drawBubbleChart(data) {
       });
     }); 
   })();
+
 
 
 
