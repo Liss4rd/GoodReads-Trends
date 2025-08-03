@@ -188,6 +188,8 @@
       - buffer - margin.top - margin.bottom - bodyMargin - 200;
     const height = Math.min(targetHeight, availableHeight);
 
+    const height = Math.min(targetHeight, availableHeight);
+
     d3.select("#chart1").selectAll("*").remove();
 
     const svg = d3.select("#chart1")
@@ -197,12 +199,16 @@
       .append("g")
       .attr("transform", `translate(${margin.left},${margin.top})`);
 
-    const tooltip = d3.select(".tooltip").empty()
-      ? d3.select("body").append("div").attr("class", "tooltip").style("opacity", 0)
-      : d3.select(".tooltip");
+    // Tooltip
+    let tooltip = d3.select(".tooltip");
+    if (tooltip.empty()) {
+      tooltip = d3.select("body").append("div")
+      .attr("class", "tooltip")
+      .style("opacity", 0);
+    }
 
     const x = d3.scaleLinear()
-      .domain([state.startYear, state.endYear])
+      .domain([startYear, endYear])
       .range([0, width]);
 
     const y = d3.scaleLinear()
@@ -214,54 +220,110 @@
       .domain(topGenres)
       .range(d3.schemeTableau10);
 
+    // Axes + Labels
     svg.append("g")
       .attr("transform", `translate(0,${height})`)
       .call(d3.axisBottom(x).tickFormat(d3.format("d")));
 
-    svg.append("g").call(d3.axisLeft(y));
+    svg.append("text")
+      .attr("x", width / 2)
+      .attr("y", height + 45)
+      .attr("fill", "#000")
+      .attr("text-anchor", "middle")
+      .style("font-size", "16px")
+      .text("Publication Year");
+
+    svg.append("g")
+      .call(d3.axisLeft(y));
+
+    svg.append("text")
+      .attr("x", -height / 2)
+      .attr("y", -60)
+      .attr("transform", "rotate(-90)")
+      .attr("fill", "#000")
+      .attr("text-anchor", "middle")
+      .style("font-size", "16px")
+      .text("Number of Books Published");
 
     const line = d3.line()
       .x(d => x(d.year))
       .y(d => y(d.count))
       .curve(d3.curveMonotoneX);
-    
-    svg.selectAll(".line")
+
+    // Draw lines with animation
+    const paths = svg.selectAll(".line")
       .data(nested)
       .join("path")
+      .attr("class", "line")
       .attr("fill", "none")
       .attr("stroke", d => color(d.genre))
       .attr("stroke-width", 2.5)
       .attr("d", d => line(d.values))
-      .style("filter", "drop-shadow(0px 0px 3px rgba(0,0,0,0.3))")
-      .each(function () {
-        const totalLength = this.getTotalLength();
-        d3.select(this)
-          .attr("stroke-dasharray", `${totalLength} ${totalLength}`)
-          .attr("stroke-dashoffset", totalLength)
-          .transition()
-          .duration(1500)
-          .ease(d3.easeCubic)
-          .attr("stroke-dashoffset", 0);
+      .style("filter", "drop-shadow(0px 0px 3px rgba(0,0,0,0.3))");
+
+    paths.each(function () {
+      const totalLength = this.getTotalLength();
+      d3.select(this)
+        .attr("stroke-dasharray", totalLength + " " + totalLength)
+        .attr("stroke-dashoffset", totalLength)
+        .transition()
+        .duration(1500)
+        .ease(d3.easeCubic)
+        .attr("stroke-dashoffset", 0);
+    });
+
+    // Points + Tooltips
+    nested.forEach(series => {
+      svg.selectAll(`.point-${series.genre}`)
+        .data(series.values)
+        .join("circle")
+        .attr("cx", d => x(d.year))
+        .attr("cy", d => y(d.count))
+        .attr("r", 4)
+        .attr("fill", color(series.genre))
+        .on("mouseover", function (event, d) {
+          tooltip.transition().duration(200).style("opacity", 0.9);
+          tooltip.html(`<strong>${d.genre}</strong><br/>${d.year}: ${d.count} books`)
+            .style("left", (event.pageX + 8) + "px")
+            .style("top", (event.pageY - 28) + "px");
+        })
+
+        .on("mouseout", function () {
+          tooltip.transition().duration(300).style("opacity", 0);
+        });
+
+    });
+
+
+
+    // Legend 
+
+    const legend = svg.selectAll(".legend")
+      .data(topGenres)
+      .join("g")
+      .attr("transform", (d, i) => `translate(${width + 30},${i * 24})`)
+      .on("mouseover", function (event, genre) {
+        svg.selectAll(".line").attr("opacity", d => d.genre === genre ? 1 : 0.1);
+        svg.selectAll("circle").attr("opacity", d => d.genre === genre ? 1 : 0.1);
+      })
+
+      .on("mouseout", function () {
+        svg.selectAll(".line").attr("opacity", 1);
+        svg.selectAll("circle").attr("opacity", 1);
       });
-      
-      nested.forEach((series, i) => {
-        svg.selectAll(`.point-${series.genre}`)
-          .data(series.values)
-          .join("circle")
-          .attr("cx", d => x(d.year))
-          .attr("cy", d => y(d.count))
-          .attr("r", 4)
-          .attr("fill", color(series.genre))
-          .style("opacity", 0)
-          .transition()
-              .delay(d => {
-                const progress = (d.year - firstYear) / yearSpan;
-                return progress * totalDuration; 
-          })
-          .duration(400)
-          .style("opacity", 1);
-      });
-        }
+
+    legend.append("rect")
+      .attr("width", 14)
+      .attr("height", 14)
+      .attr("fill", color);
+
+    legend.append("text")
+      .attr("x", 20)
+      .attr("y", 7)
+      .attr("dy", "0.32em")
+      .style("font-size", "14px")
+      .text(d => d);
+  }
 
 // =========================
 // Scene 2: Popularity & Quality
@@ -371,6 +433,7 @@ function drawBubbleChart(data) {
 
   updateSlider();
 })();
+
 
 
 
