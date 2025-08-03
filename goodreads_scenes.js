@@ -40,6 +40,12 @@
         genre: d.genres || "Other"
       };
     }).filter(d => d.year);
+
+      if (!state.genreColor) {
+        state.genreColor = d3.scaleOrdinal()
+          .domain([...new Set(state.allReviewsData.map(d => d.genre))])
+          .range(d3.schemeTableau10);
+      }
   
     reviewsLoaded = true;
 
@@ -224,9 +230,7 @@
       .nice()
       .range([height, 0]);
 
-    const color = d3.scaleOrdinal()
-      .domain(topGenres)
-      .range(d3.schemeTableau10);
+    const color = state.genreColor;
 
     // Axes + Labels
     svg.append("g")
@@ -357,10 +361,8 @@ function updateScene2WithYears() {
 }
 
 function drawBubbleChart(data) {
-  // Remove old chart
   d3.select("#chart2").selectAll("*").remove();
 
-  // Margins + dynamic sizing like Scene 1
   const margin = { top: 40, right: 40, bottom: 60, left: 60 };
   const containerWidth = document.querySelector("#chart2").clientWidth;
   const width = containerWidth * 0.8 - margin.left - margin.right;
@@ -373,10 +375,7 @@ function drawBubbleChart(data) {
 
   const height = Math.min(targetHeight, availableHeight);
 
-  // Match Scene 1 colors by genre
-  const color = d3.scaleOrdinal()
-    .domain([...new Set(state.allData.map(d => d.genre))])
-    .range(d3.schemeTableau10);
+  const color = state.genreColor;
 
   const svg = d3.select("#chart2").append("svg")
     .attr("width", width + margin.left + margin.right)
@@ -457,7 +456,6 @@ document.querySelectorAll(".tab-button").forEach(btn => {
       if (reviewsLoaded) {
         updateScene2WithYears();
       } else {
-        // Re-run after load finishes
         const checkLoaded = setInterval(() => {
           if (reviewsLoaded) {
             updateScene2WithYears();
@@ -469,6 +467,7 @@ document.querySelectorAll(".tab-button").forEach(btn => {
     });
   }); 
 })();
+
 
 
 
