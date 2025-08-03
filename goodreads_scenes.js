@@ -1,4 +1,4 @@
-(  function () {
+(function () {
   const state = {
     minYear: 2000,
     maxYear: 2024,
@@ -442,7 +442,8 @@ document.querySelectorAll(".tab-button").forEach(btn => {
       }
     }
   });
-});
+})();
+
 
 
 
