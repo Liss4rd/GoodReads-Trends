@@ -478,18 +478,17 @@ function drawBubbleChart(data) {
     const genres = [...new Set(state.allReviewsData.map(d => d.mainGenre))].sort();
     const select = d3.select("#genreSelect");
     select.selectAll("option").remove();
+  
+    select.append("option")
+      .attr("value", "")
+      .attr("disabled", true)
+      .attr("selected", true)
+      .text("Select genres"); 
+  
     genres.forEach(genre => {
       select.append("option")
-        .attr("value", "")
-        .attr("disabled", true)
-        .attr("selected", true)
-        .text("-- Select Genre(s) --");
-      
-      genres.forEach(genre => {
-        select.append("option")
-          .attr("value", genre)
-          .text(genre);
-      });
+        .attr("value", genre)
+        .text(genre);
     });
   }
   
@@ -732,6 +731,7 @@ function drawScene3BarChart(data) {
     });
   });
 })();
+
 
 
 
