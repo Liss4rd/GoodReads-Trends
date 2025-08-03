@@ -657,6 +657,8 @@ function drawBubbleChart(data) {
       }
     });
   });
+})();
+
 
 
 
