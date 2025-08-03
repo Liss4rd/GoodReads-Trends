@@ -556,7 +556,7 @@ function drawScene3BarChart(data) {
       .attr("width", width + margin.left + margin.right + 60) 
       .attr("height", height + margin.top + margin.bottom)
       .append("g")
-      .attr("transform", `translate(${margin.left + 60},${margin.top})`); /
+      .attr("transform", `translate(${margin.left + 60},${margin.top})`); 
   
     // Sort & limit to top 20
     const sortedData = data.sort((a, b) => d3.descending(a.review_count, b.review_count)).slice(0, 20);
@@ -705,6 +705,7 @@ function drawScene3BarChart(data) {
     });
   });
 })();
+
 
 
 
