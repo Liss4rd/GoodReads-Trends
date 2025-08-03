@@ -148,25 +148,30 @@ h2 {
   margin-top: 6px;
 }
 
+.genre-chips {
+  margin-top: 10px;
+}
+
 .genre-chip {
-  background: #f4f0ec;
-  border: 1px solid #ccc;
-  border-radius: 14px;
+  display: inline-flex;
+  align-items: center;
+  background-color: #eee;
+  border-radius: 16px;
   padding: 4px 10px;
-  margin: 2px;
+  margin: 4px;
   font-size: 13px;
   cursor: default;
 }
 
-.genre-chip .remove-genre {
+.genre-chip .remove-chip {
+  margin-left: 8px;
   cursor: pointer;
-  margin-left: 6px;
   font-weight: bold;
+  color: #555;
 }
 
-#genreSelect {
-  margin-bottom: 10px;
-  padding: 5px;
+.genre-chip .remove-chip:hover {
+  color: #d00;
 }
 
 #bookPopup {
@@ -196,6 +201,7 @@ h2 {
 .hidden {
   display: none;
 }
+
 
 
 
