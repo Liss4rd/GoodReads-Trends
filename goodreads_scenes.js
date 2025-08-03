@@ -482,9 +482,10 @@ function drawBubbleChart(data) {
         .attr("value", genre)
         .text(genre);
     });
-    
+  
+    // Default: select first one
     if (genres.length > 0) {
-      state.selectedGenre = genres[0];
+      state.selectedGenres = [genres[0]];
     }
   }
   
@@ -492,7 +493,9 @@ function drawBubbleChart(data) {
     const filtered = state.allReviewsData.filter(d => 
       d.year >= state.startYear &&
       d.year <= state.endYear &&
-      d.allGenres.toLowerCase().includes(state.selectedGenre.toLowerCase())
+      state.selectedGenres.some(g => 
+        d.allGenres.toLowerCase().includes(g.toLowerCase())
+      )
     );
   
     drawScene3Scatter(filtered);
@@ -591,6 +594,7 @@ function drawBubbleChart(data) {
         tooltip.transition().duration(200).style("opacity", 0);
       })
       .on("click", (event, d) => showBookPopup(d));
+  }
       
   // Popup for clicked book
   function showBookPopup(d) {
@@ -612,7 +616,7 @@ function drawBubbleChart(data) {
   }
   
   d3.select("#genreSelect").on("change", function() {
-    state.selectedGenre = this.value;
+    state.selectedGenres = Array.from(this.selectedOptions).map(o => o.value);
     updateScene3WithYears();
   });
 
@@ -663,6 +667,7 @@ function drawBubbleChart(data) {
     });
   });
 })();
+
 
 
 
