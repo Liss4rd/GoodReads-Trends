@@ -459,7 +459,7 @@ function drawBubbleChart(data) {
         Genre(s): ${d.allGenres}<br/> <!-- full list -->
         Avg Rating: ${d.average_rating}<br/>
         Reviews: ${d.review_count}<br/>
-        5* Ratings: ${d.fiveStarCount}
+        5★ Ratings: ${d.fiveStarCount}
       `)
       .style("left", `${event.pageX + 10}px`)
       .style("top", `${event.pageY - 28}px`);
@@ -723,6 +723,7 @@ function drawScene3BarChart(data) {
     });
   });
 })();
+
 
 
 
