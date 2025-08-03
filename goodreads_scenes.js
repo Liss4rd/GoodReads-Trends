@@ -633,7 +633,7 @@ function drawScene3BarChart(data) {
     // X-axis label
     svg.append("text")
       .attr("x", width / 2)
-      .attr("y", height + margin.bottom - 2.5)
+      .attr("y", height + margin.bottom - 7.5)
       .attr("text-anchor", "middle")
       .style("font-size", "14px")
       .text("Number of Reviews");
@@ -723,6 +723,7 @@ function drawScene3BarChart(data) {
     });
   });
 })();
+
 
 
 
