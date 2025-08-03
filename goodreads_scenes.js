@@ -403,6 +403,23 @@ function drawBubbleChart(data) {
   svg.append("g")
     .call(d3.axisLeft(y));
 
+  svg.append("text")
+    .attr("x", width / 2)
+    .attr("y", height + margin.bottom - 10)
+    .attr("text-anchor", "middle")
+    .style("font-size", "16px")
+    .style("fill", "#000")
+    .text("Average Rating");
+  
+  svg.append("text")
+    .attr("transform", "rotate(-90)")
+    .attr("x", -height / 2)
+    .attr("y", -margin.left + 20)
+    .attr("text-anchor", "middle")
+    .style("font-size", "16px")
+    .style("fill", "#000")
+    .text("Number of Reviews");
+
   // Bubbles
   svg.selectAll("circle")
     .data(data)
@@ -467,6 +484,7 @@ document.querySelectorAll(".tab-button").forEach(btn => {
     });
   }); 
 })();
+
 
 
 
