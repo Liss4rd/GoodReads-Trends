@@ -194,7 +194,7 @@
       .x(d => x(d.year))
       .y(d => y(d.count))
       .curve(d3.curveMonotoneX);
-
+    
     svg.selectAll(".line")
       .data(nested)
       .join("path")
@@ -202,16 +202,31 @@
       .attr("stroke", d => color(d.genre))
       .attr("stroke-width", 2.5)
       .attr("d", d => line(d.values))
-      .style("filter", "drop-shadow(0px 0px 3px rgba(0,0,0,0.3))");
+      .style("filter", "drop-shadow(0px 0px 3px rgba(0,0,0,0.3))")
+      .each(function () {
+        const totalLength = this.getTotalLength();
+        d3.select(this)
+          .attr("stroke-dasharray", `${totalLength} ${totalLength}`)
+          .attr("stroke-dashoffset", totalLength)
+          .transition()
+          .duration(1500)
+          .ease(d3.easeCubic)
+          .attr("stroke-dashoffset", 0);
+      });
 
-    nested.forEach(series => {
+    nested.forEach((series, i) => {
       svg.selectAll(`.point-${series.genre}`)
         .data(series.values)
         .join("circle")
         .attr("cx", d => x(d.year))
         .attr("cy", d => y(d.count))
         .attr("r", 4)
-        .attr("fill", color(series.genre));
+        .attr("fill", color(series.genre))
+        .style("opacity", 0)
+        .transition()
+        .delay(1500 + i * 150) 
+        .duration(500)
+        .style("opacity", 1);
     });
   }
 
@@ -340,4 +355,5 @@ function drawBubbleChart(data) {
 
   updateSlider();
 })();
+
 
