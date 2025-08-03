@@ -439,10 +439,12 @@ document.querySelectorAll(".tab-button").forEach(btn => {
             clearInterval(checkLoaded);
           }
         }, 200);
+        }
       }
-    }
-  });
+    });
+  }); 
 })();
+
 
 
 
