@@ -490,6 +490,7 @@ function drawBubbleChart(data) {
           .attr("value", genre)
           .text(genre);
       });
+    });
   }
   
   d3.select("#genreSelect").on("change", function() {
@@ -731,6 +732,7 @@ function drawScene3BarChart(data) {
     });
   });
 })();
+
 
 
 
