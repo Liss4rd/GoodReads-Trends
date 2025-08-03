@@ -640,6 +640,7 @@ function drawBubbleChart(data) {
       <img src="${d.cover_image_uri}" alt="Cover of ${d.book_title}">
       <h3>${d.book_title}</h3>
       <p><strong>Author:</strong> <a href="${d.authorlink}" target="_blank">${d.author}</a></p>
+      <p><strong>Genres:</strong> ${d.allGenres}</p>
       <p><strong>Average Rating:</strong> ${d.average_rating}</p>
       <p><strong>Reviews:</strong> ${d.review_count}</p>
       <p><strong>5★ Ratings:</strong> ${d.fiveStarCount}</p>
@@ -651,7 +652,7 @@ function drawBubbleChart(data) {
       popup.classed("hidden", true);
     });
   }
-  
+    
   d3.select("#genreSelect").on("change", function() {
     state.selectedGenres = Array.from(this.selectedOptions).map(o => o.value);
     updateScene3WithYears();
@@ -704,6 +705,7 @@ function drawBubbleChart(data) {
     });
   });
 })();
+
 
 
 
