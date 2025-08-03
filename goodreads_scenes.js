@@ -444,30 +444,6 @@ function drawBubbleChart(data) {
     .attr("opacity", 0.7)
     .attr("stroke", "#333");
 
-  // Legend
-  const legendGenres = [...new Set(data.map(d => d.mainGenre))];
-  
-  const legend = svg.selectAll(".legend")
-    .data(legendGenres)
-    .join("g")
-    .attr("class", "legend")
-    .attr("transform", (d, i) => `translate(${-margin.left + 10}, ${i * 20})`);
-  
-  legend.append("rect")
-    .attr("x", 0)
-    .attr("y", 0)
-    .attr("width", 14)
-    .attr("height", 14)
-    .attr("fill", d => state.genreColor(d));
-  
-  legend.append("text")
-    .attr("x", 20)
-    .attr("y", 7)
-    .attr("dy", "0.32em")
-    .style("font-size", "13px")
-    .style("fill", "#000")
-    .text(d => d);
-
   // Tooltip
   const tooltip = d3.select("body").append("div")
     .attr("class", "tooltip")
@@ -663,6 +639,7 @@ function drawBubbleChart(data) {
       });
     }); 
   })();
+
 
 
 
