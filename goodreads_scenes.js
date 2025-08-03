@@ -188,8 +188,6 @@
       - buffer - margin.top - margin.bottom - bodyMargin - 200;
     const height = Math.min(targetHeight, availableHeight);
 
-    const height = Math.min(targetHeight, availableHeight);
-
     d3.select("#chart1").selectAll("*").remove();
 
     const svg = d3.select("#chart1")
@@ -445,6 +443,7 @@ document.querySelectorAll(".tab-button").forEach(btn => {
     }
   });
 });
+
 
 
 
