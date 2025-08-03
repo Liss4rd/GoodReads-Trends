@@ -480,9 +480,16 @@ function drawBubbleChart(data) {
     select.selectAll("option").remove();
     genres.forEach(genre => {
       select.append("option")
-        .attr("value", genre)
-        .text(genre);
-    });
+        .attr("value", "")
+        .attr("disabled", true)
+        .attr("selected", true)
+        .text("-- Select Genre(s) --");
+      
+      genres.forEach(genre => {
+        select.append("option")
+          .attr("value", genre)
+          .text(genre);
+      });
   }
   
   d3.select("#genreSelect").on("change", function() {
@@ -724,6 +731,7 @@ function drawScene3BarChart(data) {
     });
   });
 })();
+
 
 
 
