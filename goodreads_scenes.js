@@ -638,9 +638,26 @@ function drawBubbleChart(data) {
           }, 200);
           }
         }
-      });
-    }); 
-  })();
+
+          if (tabId === "scene3") {
+      if (reviewsLoaded) {
+        populateGenreDropdown(); 
+        updateScene3WithYears();  
+      } else {
+        const checkLoaded = setInterval(() => {
+          if (reviewsLoaded) {
+            populateGenreDropdown();
+            updateScene3WithYears();
+            clearInterval(checkLoaded);
+          }
+        }, 200);
+      }
+    }
+  });
+});
+}); 
+})();
+
 
 
 
