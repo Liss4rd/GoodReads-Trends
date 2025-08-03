@@ -548,7 +548,7 @@ function drawScene3BarChart(data) {
       return;
     }
   
-    const margin = { top: 40, right: 30, bottom: 40, left: 80 };
+    const margin = { top: 40, right: 30, bottom: 40, left: 120 };
     const containerWidth = document.querySelector("#chart3").clientWidth;
     const width = containerWidth - margin.left - margin.right;
     const height = Math.min(800, data.length * 60);
@@ -584,7 +584,7 @@ function drawScene3BarChart(data) {
       .enter()
       .append("image")
       .attr("xlink:href", d => d.cover_image_uri)
-      .attr("x", -25) 
+      .attr("x", -y.bandwidth() - 10)
       .attr("y", d => y(d.rank))
       .attr("width", y.bandwidth())
       .attr("height", y.bandwidth())
@@ -724,6 +724,7 @@ function drawScene3BarChart(data) {
     });
   });
 })();
+
 
 
 
