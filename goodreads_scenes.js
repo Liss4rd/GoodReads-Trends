@@ -224,7 +224,10 @@
           .attr("fill", color(series.genre))
           .style("opacity", 0)
           .transition()
-          .delay(1500 + i * 150) 
+              .delay(d => {
+                const progress = (d.year - firstYear) / yearSpan;
+                return progress * totalDuration; 
+          })
           .duration(400)
           .style("opacity", 1);
       });
@@ -355,6 +358,7 @@ function drawBubbleChart(data) {
 
   updateSlider();
 })();
+
 
 
 
