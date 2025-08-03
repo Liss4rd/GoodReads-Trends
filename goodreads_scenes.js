@@ -536,7 +536,7 @@ function drawBubbleChart(data) {
     drawScene3BarChart(filtered);
   }
   
-  function drawScene3BarChart(data) {
+function drawScene3BarChart(data) {
     d3.select("#chart3").selectAll("*").remove();
   
     if (!data.length) {
@@ -547,29 +547,47 @@ function drawBubbleChart(data) {
       return;
     }
   
-    const margin = { top: 40, right: 30, bottom: 40, left: 200 };
+    const margin = { top: 40, right: 30, bottom: 40, left: 80 };
     const width = document.querySelector("#chart3").clientWidth - margin.left - margin.right;
-    const height = Math.min(600, data.length * 25);
+    const height = Math.min(600, data.length * 50); // space for covers
   
     const svg = d3.select("#chart3")
       .append("svg")
-      .attr("width", width + margin.left + margin.right)
+      .attr("width", width + margin.left + margin.right + 60) // extra for covers
       .attr("height", height + margin.top + margin.bottom)
       .append("g")
-      .attr("transform", `translate(${margin.left},${margin.top})`);
+      .attr("transform", `translate(${margin.left + 60},${margin.top})`); // shift for covers
   
     // Sort & limit to top 20
     const sortedData = data.sort((a, b) => d3.descending(a.review_count, b.review_count)).slice(0, 20);
   
+    // Add rank numbers
+    sortedData.forEach((d, i) => d.rank = i + 1);
+  
     const y = d3.scaleBand()
-      .domain(sortedData.map(d => d.book_title))
+      .domain(sortedData.map(d => d.rank))
       .range([0, height])
-      .padding(0.1);
+      .padding(0.15);
   
     const x = d3.scaleLinear()
       .domain([0, d3.max(sortedData, d => d.review_count)])
       .nice()
       .range([0, width]);
+  
+    // Covers
+    const covers = d3.select("#chart3 svg").append("g")
+      .attr("transform", `translate(${margin.left},${margin.top})`);
+  
+    covers.selectAll(".cover")
+      .data(sortedData)
+      .enter()
+      .append("image")
+      .attr("xlink:href", d => d.cover_image_uri)
+      .attr("x", -55) // to left of bars
+      .attr("y", d => y(d.rank) + 5)
+      .attr("width", 40)
+      .attr("height", 40)
+      .attr("preserveAspectRatio", "xMidYMid slice");
   
     // Bars
     svg.selectAll(".bar")
@@ -577,7 +595,7 @@ function drawBubbleChart(data) {
       .enter()
       .append("rect")
       .attr("class", "bar")
-      .attr("y", d => y(d.book_title))
+      .attr("y", d => y(d.rank))
       .attr("width", d => x(d.review_count))
       .attr("height", y.bandwidth())
       .attr("fill", d => state.genreColor(d.mainGenre))
@@ -586,9 +604,9 @@ function drawBubbleChart(data) {
         tooltip.html(`
           <strong>${d.book_title}</strong><br/>
           Author: ${d.author}<br/>
+          Genres: ${d.allGenres}<br/>
           Avg Rating: ${d.average_rating}<br/>
-          Reviews: ${d.review_count}<br/>
-          Genres: ${d.allGenres}
+          Reviews: ${d.review_count}
         `)
         .style("left", `${event.pageX + 10}px`)
         .style("top", `${event.pageY - 28}px`);
@@ -598,9 +616,14 @@ function drawBubbleChart(data) {
       })
       .on("click", (event, d) => showBookPopup(d));
   
-    // Axes
-    svg.append("g").call(d3.axisLeft(y).tickSize(0).tickPadding(6));
-    svg.append("g").attr("transform", `translate(0,${height})`).call(d3.axisBottom(x));
+    // Y-axis (rank numbers)
+    svg.append("g")
+      .call(d3.axisLeft(y));
+  
+    // X-axis (review count)
+    svg.append("g")
+      .attr("transform", `translate(0,${height})`)
+      .call(d3.axisBottom(x));
   
     // Tooltip
     let tooltip = d3.select("body").selectAll(".tooltip").data([null]);
@@ -683,6 +706,7 @@ function drawBubbleChart(data) {
     });
   });
 })();
+
 
 
 
