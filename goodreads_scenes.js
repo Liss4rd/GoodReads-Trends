@@ -1,12 +1,16 @@
-// =========================
-// Year Range Slider with D3
-// =========================
 (function () {
-  const minYear = 2000;
-  const maxYear = 2024;
-  window.startYear = 2005;
-  window.endYear = 2020;
+  const state = {
+    minYear: 2000,
+    maxYear: 2024,
+    startYear: 2005,
+    endYear: 2020,
+    allData: [],
+    allReviewsData: []
+  };
 
+  // =========================
+  // Year Range Slider with D3
+  // =========================
   const width = 1000;
   const height = 80;
 
@@ -15,117 +19,109 @@
     .attr("height", height);
 
   const x = d3.scaleLinear()
-    .domain([minYear, maxYear])
+    .domain([state.minYear, state.maxYear])
     .range([50, width + 50])
     .clamp(true);
 
   const axis = d3.axisBottom(x)
     .tickFormat(d3.format("d"))
-    .ticks(maxYear - minYear);
+    .ticks(state.maxYear - state.minYear);
 
   svg.append("g")
     .attr("class", "slider-axis")
     .attr("transform", `translate(0, ${height / 2 + 20})`)
     .call(axis);
 
-  // Track line
   svg.append("line")
     .attr("class", "track")
-    .attr("x1", x(minYear))
-    .attr("x2", x(maxYear))
+    .attr("x1", x(state.minYear))
+    .attr("x2", x(state.maxYear))
     .attr("y1", height / 2)
     .attr("y2", height / 2);
 
-  // Fill line between thumbs
   const fillLine = svg.append("line")
     .attr("class", "track-fill")
-    .attr("x1", x(startYear))
-    .attr("x2", x(endYear))
+    .attr("x1", x(state.startYear))
+    .attr("x2", x(state.endYear))
     .attr("y1", height / 2)
     .attr("y2", height / 2);
 
-  // Start thumb
   const thumbStart = svg.append("circle")
     .attr("class", "thumb")
     .attr("r", 8)
-    .attr("cx", x(startYear))
+    .attr("cx", x(state.startYear))
     .attr("cy", height / 2)
     .call(d3.drag().on("drag", draggedStart));
 
-  // End thumb
   const thumbEnd = svg.append("circle")
     .attr("class", "thumb")
     .attr("r", 8)
-    .attr("cx", x(endYear))
+    .attr("cx", x(state.endYear))
     .attr("cy", height / 2)
     .call(d3.drag().on("drag", draggedEnd));
 
   function draggedStart(event) {
     let newVal = Math.round(x.invert(event.x));
-    if (newVal >= minYear && newVal < endYear) {
-      startYear = newVal;
-      update();
+    if (newVal >= state.minYear && newVal < state.endYear) {
+      state.startYear = newVal;
+      updateSlider();
     }
   }
 
   function draggedEnd(event) {
     let newVal = Math.round(x.invert(event.x));
-    if (newVal <= maxYear && newVal > startYear) {
-      endYear = newVal;
-      update();
+    if (newVal <= state.maxYear && newVal > state.startYear) {
+      state.endYear = newVal;
+      updateSlider();
     }
   }
 
-  function update() {
-    thumbStart.attr("cx", x(startYear));
-    thumbEnd.attr("cx", x(endYear));
-    fillLine.attr("x1", x(startYear)).attr("x2", x(endYear));
-    d3.select("#yearStart").text(startYear);
-    d3.select("#yearEnd").text(endYear);
+  function updateSlider() {
+    thumbStart.attr("cx", x(state.startYear));
+    thumbEnd.attr("cx", x(state.endYear));
+    fillLine.attr("x1", x(state.startYear)).attr("x2", x(state.endYear));
+    d3.select("#yearStart").text(state.startYear);
+    d3.select("#yearEnd").text(state.endYear);
 
-    updateScene1WithYears(startYear, endYear);
+    if (!d3.select("#scene1").classed("hidden")) {
+      updateScene1WithYears();
+    } else if (!d3.select("#scene2").classed("hidden")) {
+      updateScene2WithYears();
+    }
   }
 
   // =============================
-  // Scene 1: Genre Timeline Chart
+  // Scene 1: Literary Genre Timeline
   // =============================
-  let allData = [];
-
   d3.csv("Book_Details.csv").then(data => {
     const processed = [];
 
     data.forEach(d => {
       let year = null;
-
       if (d.publication_info) {
         const match = d.publication_info.match(/\b(19|20)\d{2}\b/);
-        if (match) {
-          year = +match[0];
-        }
+        if (match) year = +match[0];
       }
       if (!year || isNaN(year)) return;
 
       let genres = [];
       try {
         genres = JSON.parse(d.genres.replace(/'/g, '"'));
-      } catch (e) {
+      } catch {
         genres = [];
       }
 
       genres.forEach(g => {
-        processed.push({
-          year: year,
-          genre: g.trim()
-        });
+        processed.push({ year, genre: g.trim() });
       });
     });
 
-    allData = processed;
-    updateScene1WithYears(startYear, endYear);
+    state.allData = processed;
+    updateScene1WithYears();
   });
 
-  function updateScene1WithYears(startYear, endYear) {
-    const filtered = allData.filter(d => d.year >= startYear && d.year <= endYear);
+  function updateScene1WithYears() {
+    const filtered = state.allData.filter(d => d.year >= state.startYear && d.year <= state.endYear);
 
     const topGenres = Array.from(
       d3.rollup(filtered, v => v.length, d => d.genre),
@@ -147,28 +143,19 @@
       ).sort((a, b) => d3.ascending(a.year, b.year))
     }));
 
-    drawLineChart(nested, topGenres, startYear, endYear);
+    drawLineChart(nested, topGenres);
   }
 
-  function drawLineChart(nested, topGenres, startYear, endYear) {
+  function drawLineChart(nested, topGenres) {
     const margin = { top: 40, right: 220, bottom: 80, left: 80 };
-
     const containerWidth = document.querySelector("#chart1").clientWidth;
     const width = containerWidth * 0.8 - margin.left - margin.right;
-
-    const buffer = 10;
-    const bodyMargin = 32;
-    const targetHeight = 792;
+    const buffer = 10, bodyMargin = 32, targetHeight = 792;
     const availableHeight = window.innerHeight
       - document.querySelector("header").offsetHeight
       - document.querySelector(".tab-container").offsetHeight
       - document.querySelector("#slider-container").offsetHeight
-      - buffer
-      - margin.top
-      - margin.bottom
-      - bodyMargin
-      - 200;
-
+      - buffer - margin.top - margin.bottom - bodyMargin - 200;
     const height = Math.min(targetHeight, availableHeight);
 
     d3.select("#chart1").selectAll("*").remove();
@@ -180,16 +167,12 @@
       .append("g")
       .attr("transform", `translate(${margin.left},${margin.top})`);
 
-    // Tooltip
-    let tooltip = d3.select(".tooltip");
-    if (tooltip.empty()) {
-      tooltip = d3.select("body").append("div")
-      .attr("class", "tooltip")
-      .style("opacity", 0);
-    }
-    
+    const tooltip = d3.select(".tooltip").empty()
+      ? d3.select("body").append("div").attr("class", "tooltip").style("opacity", 0)
+      : d3.select(".tooltip");
+
     const x = d3.scaleLinear()
-      .domain([startYear, endYear])
+      .domain([state.startYear, state.endYear])
       .range([0, width]);
 
     const y = d3.scaleLinear()
@@ -201,59 +184,26 @@
       .domain(topGenres)
       .range(d3.schemeTableau10);
 
-    // Axes + Labels
     svg.append("g")
       .attr("transform", `translate(0,${height})`)
       .call(d3.axisBottom(x).tickFormat(d3.format("d")));
 
-    svg.append("text")
-      .attr("x", width / 2)
-      .attr("y", height + 45)
-      .attr("fill", "#000")
-      .attr("text-anchor", "middle")
-      .style("font-size", "16px")
-      .text("Publication Year");
-
-    svg.append("g")
-      .call(d3.axisLeft(y));
-
-    svg.append("text")
-      .attr("x", -height / 2)
-      .attr("y", -60)
-      .attr("transform", "rotate(-90)")
-      .attr("fill", "#000")
-      .attr("text-anchor", "middle")
-      .style("font-size", "16px")
-      .text("Number of Books Published");
+    svg.append("g").call(d3.axisLeft(y));
 
     const line = d3.line()
       .x(d => x(d.year))
       .y(d => y(d.count))
       .curve(d3.curveMonotoneX);
 
-    // Draw lines with animation
-    const paths = svg.selectAll(".line")
+    svg.selectAll(".line")
       .data(nested)
       .join("path")
-      .attr("class", "line")
       .attr("fill", "none")
       .attr("stroke", d => color(d.genre))
       .attr("stroke-width", 2.5)
       .attr("d", d => line(d.values))
       .style("filter", "drop-shadow(0px 0px 3px rgba(0,0,0,0.3))");
 
-    paths.each(function () {
-      const totalLength = this.getTotalLength();
-      d3.select(this)
-        .attr("stroke-dasharray", totalLength + " " + totalLength)
-        .attr("stroke-dashoffset", totalLength)
-        .transition()
-        .duration(1500)
-        .ease(d3.easeCubic)
-        .attr("stroke-dashoffset", 0);
-    });
-
-    // Points + Tooltips
     nested.forEach(series => {
       svg.selectAll(`.point-${series.genre}`)
         .data(series.values)
@@ -261,152 +211,56 @@
         .attr("cx", d => x(d.year))
         .attr("cy", d => y(d.count))
         .attr("r", 4)
-        .attr("fill", color(series.genre))
-        .on("mouseover", function (event, d) {
-          tooltip.transition().duration(200).style("opacity", 0.9);
-          tooltip.html(`<strong>${d.genre}</strong><br/>${d.year}: ${d.count} books`)
-            .style("left", (event.pageX + 8) + "px")
-            .style("top", (event.pageY - 28) + "px");
-        })
-        .on("mouseout", function () {
-          tooltip.transition().duration(300).style("opacity", 0);
-        });
+        .attr("fill", color(series.genre));
     });
-
-    // Legend 
-    const legend = svg.selectAll(".legend")
-      .data(topGenres)
-      .join("g")
-      .attr("transform", (d, i) => `translate(${width + 30},${i * 24})`)
-      .on("mouseover", function (event, genre) {
-        svg.selectAll(".line").attr("opacity", d => d.genre === genre ? 1 : 0.1);
-        svg.selectAll("circle").attr("opacity", d => d.genre === genre ? 1 : 0.1);
-      })
-      .on("mouseout", function () {
-        svg.selectAll(".line").attr("opacity", 1);
-        svg.selectAll("circle").attr("opacity", 1);
-      });
-
-    legend.append("rect")
-      .attr("width", 14)
-      .attr("height", 14)
-      .attr("fill", color);
-
-    legend.append("text")
-      .attr("x", 20)
-      .attr("y", 7)
-      .attr("dy", "0.32em")
-      .style("font-size", "14px")
-      .text(d => d);
   }
-  
- // =========================
-// Scene 2: Popularity vs Quality Bubble Chart
-// =========================
-function updateScene2WithYears(startYear, endYear) {
-  const filtered = allReviewsData.filter(d => 
-    d.year >= startYear && d.year <= endYear
-  );
 
-  d3.select("#chart2").selectAll("*").remove();
-
-  const svg = d3.select("#chart2")
-    .append("svg")
-    .attr("width", 900)
-    .attr("height", 500);
-
-  drawBubbleChart(svg, filtered);
-}
-
-function drawBubbleChart(svg, data) {
-  const width = +svg.attr("width");
-  const height = +svg.attr("height");
-  const margin = { top: 40, right: 40, bottom: 60, left: 60 };
-
-  data.forEach(d => {
-    d.average_rating = +d.average_rating || 0;
-    d.review_count = +d.review_count || 0;
-    d.likes_on_review = +d.likes_on_review || 0;
+  // =========================
+  // Scene 2: Popularity & Quality
+  // =========================
+  d3.csv("Book_Reviews.csv").then(data => {
+    state.allReviewsData = data.map(d => ({
+      ...d,
+      year: +d.year || null,
+      average_rating: +d.average_rating || 0,
+      review_count: +d.review_count || 0,
+      likes_on_review: +d.likes_on_review || 0
+    }));
   });
 
-  // Scales
-  const x = d3.scaleLinear()
-    .domain([0, 5]) // ratings are 0-5
-    .range([margin.left, width - margin.right]);
+  function updateScene2WithYears() {
+    const filtered = state.allReviewsData.filter(d => d.year >= state.startYear && d.year <= state.endYear);
+    d3.select("#chart2").selectAll("*").remove();
+    drawBubbleChart(filtered);
+  }
 
-  const y = d3.scaleLinear()
-    .domain([0, d3.max(data, d => d.review_count) || 1])
-    .range([height - margin.bottom, margin.top]);
+  function drawBubbleChart(data) {
+    const svg = d3.select("#chart2").append("svg")
+      .attr("width", 900)
+      .attr("height", 500);
 
-  const size = d3.scaleSqrt()
-    .domain([0, d3.max(data, d => d.likes_on_review) || 1])
-    .range([2, 40]);
+    const width = +svg.attr("width");
+    const height = +svg.attr("height");
+    const margin = { top: 40, right: 40, bottom: 60, left: 60 };
 
-  const color = d3.scaleOrdinal(d3.schemeTableau10);
+    const x = d3.scaleLinear().domain([0, 5]).range([margin.left, width - margin.right]);
+    const y = d3.scaleLinear().domain([0, d3.max(data, d => d.review_count) || 1]).range([height - margin.bottom, margin.top]);
+    const size = d3.scaleSqrt().domain([0, d3.max(data, d => d.likes_on_review) || 1]).range([2, 40]);
+    const color = d3.scaleOrdinal(d3.schemeTableau10);
 
-  svg.append("g")
-    .attr("transform", `translate(0,${height - margin.bottom})`)
-    .call(d3.axisBottom(x));
+    svg.append("g").attr("transform", `translate(0,${height - margin.bottom})`).call(d3.axisBottom(x));
+    svg.append("g").attr("transform", `translate(${margin.left},0)`).call(d3.axisLeft(y));
 
-  svg.append("g")
-    .attr("transform", `translate(${margin.left},0)`)
-    .call(d3.axisLeft(y));
-
-  svg.append("text")
-    .attr("x", width / 2)
-    .attr("y", height - 15)
-    .attr("text-anchor", "middle")
-    .text("Average Rating");
-
-  svg.append("text")
-    .attr("transform", "rotate(-90)")
-    .attr("x", -height / 2)
-    .attr("y", 15)
-    .attr("text-anchor", "middle")
-    .text("Number of Reviews");
-
-  svg.selectAll("circle")
-    .data(data)
-    .join("circle")
-    .attr("cx", d => x(d.average_rating))
-    .attr("cy", d => y(d.review_count))
-    .attr("r", d => size(d.likes_on_review))
-    .attr("fill", d => color(d.genre || "Other"))
-    .attr("opacity", 0.7)
-    .attr("stroke", "#333")
-    .on("mouseover", (event, d) => {
-      d3.select(event.currentTarget)
-        .attr("stroke", "black")
-        .attr("stroke-width", 2);
-
-      const tooltip = d3.select("body").append("div")
-        .attr("class", "tooltip")
-        .style("position", "absolute")
-        .style("background", "white")
-        .style("border", "1px solid #ccc")
-        .style("padding", "5px")
-        .html(`
-          <strong>${d.book_title || "Unknown"}</strong><br/>
-          Rating: ${d.average_rating}<br/>
-          Reviews: ${d.review_count}<br/>
-          Likes: ${d.likes_on_review}
-        `);
-      
-      tooltip.style("left", (event.pageX + 10) + "px")
-             .style("top", (event.pageY - 20) + "px");
-    })
-    .on("mouseout", (event) => {
-      d3.select(event.currentTarget)
-        .attr("stroke", "#333")
-        .attr("stroke-width", 1);
-      d3.selectAll(".tooltip").remove();
-    });
-}
-
-  window.addEventListener("resize", () => {
-    updateScene2WithYears(startYear, endYear);
-  });
-})();
+    svg.selectAll("circle")
+      .data(data)
+      .join("circle")
+      .attr("cx", d => x(d.average_rating))
+      .attr("cy", d => y(d.review_count))
+      .attr("r", d => size(d.likes_on_review))
+      .attr("fill", d => color(d.genre || "Other"))
+      .attr("opacity", 0.7)
+      .attr("stroke", "#333");
+  }
 
   // =============================
   // Tab Switcher
@@ -415,36 +269,14 @@ function drawBubbleChart(svg, data) {
     btn.addEventListener("click", () => {
       document.querySelectorAll(".tab-button").forEach(b => b.classList.remove("active"));
       btn.classList.add("active");
-
       document.querySelectorAll(".tab-content").forEach(tc => tc.classList.add("hidden"));
       const tabId = btn.dataset.tab;
       document.getElementById(tabId).classList.remove("hidden");
 
-      if (tabId === "scene2") {
-        d3.select("#chart2").selectAll("*").remove();
-        loadScene2();
-      }
+      if (tabId === "scene1") updateScene1WithYears();
+      if (tabId === "scene2") updateScene2WithYears();
     });
   });
 
-  update();
-
-  window.addEventListener("resize", () => {
-    updateScene1WithYears(startYear, endYear);
-  });
-
+  updateSlider();
 })();
-
-
-
-
-
-
-
-
-
-
-
-
-
-
