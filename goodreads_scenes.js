@@ -1,4 +1,4 @@
-(function () {
+(  function () {
   const state = {
     minYear: 2000,
     maxYear: 2024,
@@ -7,6 +7,24 @@
     allData: [],
     allReviewsData: []
   };
+  
+  // =========================
+  // Load Scene 2 Data Immediately
+  // =========================
+  let reviewsLoaded = false;
+  
+  d3.csv("Book_Reviews.csv").then(data => {
+    state.allReviewsData = data.map(d => ({
+      ...d,
+      year: +d.year || null,
+      average_rating: +d.average_rating || 0,
+      review_count: +d.review_count || 0,
+      likes_on_review: +d.likes_on_review || 0,
+      genre: d.genre || "Other"
+    })).filter(d => d.year);
+  
+    reviewsLoaded = true;
+  });
 
   // =========================
   // Year Range Slider with D3
@@ -236,23 +254,6 @@
 // =========================
 // Scene 2: Popularity & Quality
 // =========================
-let reviewsLoaded = false;
-
-d3.csv("Book_Reviews.csv").then(data => {
-  state.allReviewsData = data
-    .map(d => ({
-      ...d,
-      year: +d.year || null,
-      average_rating: +d.average_rating || 0,
-      review_count: +d.review_count || 0,
-      likes_on_review: +d.likes_on_review || 0,
-      genre: d.genre || "Other"
-    }))
-    .filter(d => d.year); 
-
-  reviewsLoaded = true;
-});
-
 function updateScene2WithYears() {
   if (!reviewsLoaded) {
     console.warn("Scene 2 data not loaded yet.");
@@ -358,6 +359,7 @@ function drawBubbleChart(data) {
 
   updateSlider();
 })();
+
 
 
 
