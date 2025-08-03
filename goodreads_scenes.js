@@ -642,7 +642,7 @@ function drawScene3BarChart(data) {
     svg.append("text")
       .attr("transform", "rotate(-90)")
       .attr("x", -height / 2)
-      .attr("y", -margin.left - 50) // adjust for cover images
+      .attr("y", -margin.left - 30) 
       .attr("text-anchor", "middle")
       .style("font-size", "14px")
       .text("Top Ranked Books");
@@ -723,6 +723,7 @@ function drawScene3BarChart(data) {
     });
   });
 })();
+
 
 
 
