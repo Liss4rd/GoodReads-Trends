@@ -473,20 +473,57 @@ function drawBubbleChart(data) {
   // Scene 3: Genre Exploration
   // =========================
   
+  // Initialize selectedGenres
+  state.selectedGenres = [];
+  
   function populateGenreDropdown() {
     const genres = [...new Set(state.allReviewsData.map(d => d.mainGenre))].sort();
     const select = d3.select("#genreSelect");
     select.selectAll("option").remove();
-    genres.forEach(genre => {
-      select.append("option")
-        .attr("value", genre)
-        .text(genre);
-    });
+    
+    // Add placeholder
+    select.append("option")
+      .attr("value", "")
+      .text("Select a genre");
   
-    // Default: select first one
-    if (genres.length > 0) {
-      state.selectedGenres = [genres[0]];
+    // Only show genres not already selected
+    genres.filter(g => !state.selectedGenres.includes(g))
+      .forEach(genre => {
+        select.append("option")
+          .attr("value", genre)
+          .text(genre);
+      });
+  }
+  
+  // Handle dropdown selection
+  d3.select("#genreSelect").on("change", function() {
+    const selected = this.value;
+    if (selected && !state.selectedGenres.includes(selected)) {
+      state.selectedGenres.push(selected);
+      renderSelectedGenres();
+      updateScene3WithYears();
+      populateGenreDropdown();
     }
+    this.value = ""; // Reset to placeholder
+  });
+  
+  // Render chips
+  function renderSelectedGenres() {
+    const container = d3.select("#selectedGenresContainer");
+    container.selectAll(".genre-chip").remove();
+  
+    container.selectAll(".genre-chip")
+      .data(state.selectedGenres)
+      .enter()
+      .append("div")
+      .attr("class", "genre-chip")
+      .html(d => `${d} <span class="remove-genre">×</span>`)
+      .on("click", function(event, genre) {
+        state.selectedGenres = state.selectedGenres.filter(g => g !== genre);
+        renderSelectedGenres();
+        updateScene3WithYears();
+        populateGenreDropdown();
+      });
   }
   
   function updateScene3WithYears() {
@@ -667,6 +704,7 @@ function drawBubbleChart(data) {
     });
   });
 })();
+
 
 
 
