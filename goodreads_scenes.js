@@ -588,6 +588,10 @@ function drawScene3BarChart(data) {
       .attr("width", 40)
       .attr("height", 40)
       .attr("preserveAspectRatio", "xMidYMid slice");
+
+    const scene3Color = d3.scaleOrdinal()
+      .domain(sortedData.map(d => d.book_title))
+      .range(d3.schemeTableau10.concat(d3.schemeSet3));
   
     // Bars
     svg.selectAll(".bar")
@@ -598,7 +602,7 @@ function drawScene3BarChart(data) {
       .attr("y", d => y(d.rank))
       .attr("width", d => x(d.review_count))
       .attr("height", y.bandwidth())
-      .attr("fill", d => state.genreColor(d.mainGenre))
+      .attr("fill", d => state.genreColor(d.book_title))
       .on("mouseover", (event, d) => {
         tooltip.transition().duration(200).style("opacity", 1);
         tooltip.html(`
@@ -706,6 +710,7 @@ function drawScene3BarChart(data) {
     });
   });
 })();
+
 
 
 
