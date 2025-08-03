@@ -549,14 +549,14 @@ function drawScene3BarChart(data) {
   
     const margin = { top: 40, right: 30, bottom: 40, left: 80 };
     const width = document.querySelector("#chart3").clientWidth - margin.left - margin.right;
-    const height = Math.min(600, data.length * 50); // space for covers
+    const height = Math.min(800, data.length * 60);
   
     const svg = d3.select("#chart3")
       .append("svg")
-      .attr("width", width + margin.left + margin.right + 60) // extra for covers
+      .attr("width", width + margin.left + margin.right + 60) 
       .attr("height", height + margin.top + margin.bottom)
       .append("g")
-      .attr("transform", `translate(${margin.left + 60},${margin.top})`); // shift for covers
+      .attr("transform", `translate(${margin.left + 60},${margin.top})`); /
   
     // Sort & limit to top 20
     const sortedData = data.sort((a, b) => d3.descending(a.review_count, b.review_count)).slice(0, 20);
@@ -567,7 +567,7 @@ function drawScene3BarChart(data) {
     const y = d3.scaleBand()
       .domain(sortedData.map(d => d.rank))
       .range([0, height])
-      .padding(0.15);
+      .padding(0.1);
   
     const x = d3.scaleLinear()
       .domain([0, d3.max(sortedData, d => d.review_count)])
@@ -583,10 +583,10 @@ function drawScene3BarChart(data) {
       .enter()
       .append("image")
       .attr("xlink:href", d => d.cover_image_uri)
-      .attr("x", -55) // to left of bars
-      .attr("y", d => y(d.rank) + 5)
-      .attr("width", 40)
-      .attr("height", 55)
+      .attr("x", -55) 
+      .attr("y", d => y(d.rank))
+      .attr("width", y.bandwidth())
+      .attr("height", y.bandwidth())
       .attr("preserveAspectRatio", "xMidYMid slice");
 
     const scene3Color = d3.scaleOrdinal()
@@ -705,6 +705,7 @@ function drawScene3BarChart(data) {
     });
   });
 })();
+
 
 
 
