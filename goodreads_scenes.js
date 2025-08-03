@@ -628,6 +628,23 @@ function drawScene3BarChart(data) {
     svg.append("g")
       .attr("transform", `translate(0,${height})`)
       .call(d3.axisBottom(x));
+
+    // X-axis label
+    svg.append("text")
+      .attr("x", width / 2)
+      .attr("y", height + margin.bottom - 5)
+      .attr("text-anchor", "middle")
+      .style("font-size", "14px")
+      .text("Number of Reviews");
+  
+    // Y-axis label
+    svg.append("text")
+      .attr("transform", "rotate(-90)")
+      .attr("x", -height / 2)
+      .attr("y", -margin.left - 50) // adjust for cover images
+      .attr("text-anchor", "middle")
+      .style("font-size", "14px")
+      .text("Top Ranked Books");
   
     // Tooltip
     let tooltip = d3.select("body").selectAll(".tooltip").data([null]);
@@ -705,6 +722,7 @@ function drawScene3BarChart(data) {
     });
   });
 })();
+
 
 
 
