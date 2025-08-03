@@ -13,7 +13,7 @@
   // =========================
   // Load Scene 2 Data
   // =========================
-  d3.csv("Book_Reviews.csv").then(data => {
+  d3.csv("Book_Details.csv").then(data => {
     state.allReviewsData = data.map(d => {
       let year = null;
       if (d.publication_info) {
@@ -444,6 +444,7 @@ document.querySelectorAll(".tab-button").forEach(btn => {
     });
   }); 
 })();
+
 
 
 
