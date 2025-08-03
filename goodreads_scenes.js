@@ -363,7 +363,7 @@ function updateScene2WithYears() {
 function drawBubbleChart(data) {
   d3.select("#chart2").selectAll("*").remove();
 
-  const margin = { top: 40, right: 40, bottom: 60, left: 60 };
+  const margin = { top: 40, right: 60, bottom: 60, left: 80 };
   const containerWidth = document.querySelector("#chart2").clientWidth;
   const width = containerWidth * 0.8 - margin.left - margin.right;
 
@@ -484,6 +484,7 @@ document.querySelectorAll(".tab-button").forEach(btn => {
     });
   }); 
 })();
+
 
 
 
