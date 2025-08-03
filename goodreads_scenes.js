@@ -32,6 +32,10 @@
     }).filter(d => d.year);
   
     reviewsLoaded = true;
+
+    if (!d3.select("#scene2").classed("hidden")) {
+      updateScene2WithYears();
+    }
   });
 
   // =========================
@@ -367,6 +371,7 @@ function drawBubbleChart(data) {
 
   updateSlider();
 })();
+
 
 
 
