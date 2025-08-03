@@ -478,36 +478,179 @@ function drawBubbleChart(data) {
     });
 }
 
+  // =========================
+  // Scene 3: Genre Exploration
+  // =========================
+  
+  function populateGenreDropdown() {
+    const genres = [...new Set(state.allReviewsData.map(d => d.genre))].sort();
+    const select = d3.select("#genreSelect");
+    select.selectAll("option").remove();
+    genres.forEach(genre => {
+      select.append("option")
+        .attr("value", genre)
+        .text(genre);
+    });
+    
+    if (genres.length > 0) {
+      state.selectedGenre = genres[0];
+    }
+  }
+  
+  function updateScene3WithYears() {
+    const filtered = state.allReviewsData.filter(d => 
+      d.year >= state.startYear &&
+      d.year <= state.endYear &&
+      d.genre === state.selectedGenre
+    );
+  
+    drawScene3Scatter(filtered);
+  }
+  
+  function drawScene3Scatter(data) {
+    d3.select("#chart3").selectAll("*").remove();
+  
+    const margin = { top: 40, right: 40, bottom: 80, left: 80 };
+    const containerWidth = document.querySelector("#chart3").clientWidth;
+    const width = containerWidth * 0.8 - margin.left - margin.right;
+    
+    const buffer = 10, bodyMargin = 32, targetHeight = 792;
+    const availableHeight = window.innerHeight
+      - document.querySelector("header").offsetHeight
+      - document.querySelector(".tab-container").offsetHeight
+      - buffer - margin.top - margin.bottom - bodyMargin - 200;
+    const height = Math.min(targetHeight, availableHeight);
+  
+    const svg = d3.select("#chart3").append("svg")
+      .attr("width", width + margin.left + margin.right)
+      .attr("height", height + margin.top + margin.bottom)
+      .append("g")
+      .attr("transform", `translate(${margin.left},${margin.top})`);
+  
+    const x = d3.scaleLinear()
+      .domain([0, 5])
+      .range([0, width]);
+  
+    const y = d3.scaleLinear()
+      .domain([0, d3.max(data, d => d.review_count) || 1])
+      .range([height, 0]);
+  
+    const size = d3.scaleSqrt()
+      .domain([0, d3.max(data, d => d.fiveStarCount) || 1])
+      .range([2, 40]);
+  
+    // Axes
+    svg.append("g")
+      .attr("transform", `translate(0,${height})`)
+      .call(d3.axisBottom(x));
+  
+    svg.append("g")
+      .call(d3.axisLeft(y));
+  
+    // Labels
+    svg.append("text")
+      .attr("x", width / 2)
+      .attr("y", height + 50)
+      .attr("text-anchor", "middle")
+      .style("font-size", "16px")
+      .style("fill", "#000")
+      .text("Average Rating");
+  
+    svg.append("text")
+      .attr("transform", "rotate(-90)")
+      .attr("x", -height / 2)
+      .attr("y", -margin.left + 20)
+      .attr("text-anchor", "middle")
+      .style("font-size", "16px")
+      .style("fill", "#000")
+      .text("Number of Reviews");
+  
+    // Bubbles
+    svg.selectAll("circle")
+      .data(data)
+      .join("circle")
+      .attr("cx", d => x(d.average_rating))
+      .attr("cy", d => y(d.review_count))
+      .attr("r", d => size(d.fiveStarCount))
+      .attr("fill", d => state.genreColor(d.genre))
+      .attr("opacity", 0.7)
+      .attr("stroke", "#333")
+      .on("click", (event, d) => showBookPopup(d));
+  
+    // Legend 
+    const legend = svg.selectAll(".legend")
+      .data([state.selectedGenre])
+      .join("g")
+      .attr("transform", (d, i) => `translate(${width + 10}, ${i * 20})`);
+  
+    legend.append("rect")
+      .attr("width", 14)
+      .attr("height", 14)
+      .attr("fill", d => state.genreColor(d));
+  
+    legend.append("text")
+      .attr("x", 20)
+      .attr("y", 7)
+      .attr("dy", "0.32em")
+      .style("font-size", "13px")
+      .text(d => d);
+  }
+  
+  // Popup for clicked book
+  function showBookPopup(d) {
+    const popup = d3.select("#bookPopup");
+    popup.html(`
+      <img src="${d.cover_image_uri}" alt="Cover of ${d.book_title}">
+      <h3>${d.book_title}</h3>
+      <p><strong>Author:</strong> ${d.author}</p>
+      <p><strong>Average Rating:</strong> ${d.average_rating}</p>
+      <p><strong>Reviews:</strong> ${d.review_count}</p>
+      <p><strong>5★ Ratings:</strong> ${d.fiveStarCount}</p>
+      <button id="closePopup">Close</button>
+    `);
+    popup.classed("hidden", false);
+  
+    d3.select("#closePopup").on("click", () => {
+      popup.classed("hidden", true);
+    });
+  }
+  
+  d3.select("#genreSelect").on("change", function() {
+    state.selectedGenre = this.value;
+    updateScene3WithYears();
+  });
+
   // =============================
   // Tab Switcher
   // =============================
-document.querySelectorAll(".tab-button").forEach(btn => {
-  btn.addEventListener("click", () => {
-    document.querySelectorAll(".tab-button").forEach(b => b.classList.remove("active"));
-    btn.classList.add("active");
-    document.querySelectorAll(".tab-content").forEach(tc => tc.classList.add("hidden"));
-
-    const tabId = btn.dataset.tab;
-    document.getElementById(tabId).classList.remove("hidden");
-
-    if (tabId === "scene1") {
-      updateScene1WithYears();
-    }
-    if (tabId === "scene2") {
-      if (reviewsLoaded) {
-        updateScene2WithYears();
-      } else {
-        const checkLoaded = setInterval(() => {
-          if (reviewsLoaded) {
-            updateScene2WithYears();
-            clearInterval(checkLoaded);
-          }
-        }, 200);
-        }
+  document.querySelectorAll(".tab-button").forEach(btn => {
+    btn.addEventListener("click", () => {
+      document.querySelectorAll(".tab-button").forEach(b => b.classList.remove("active"));
+      btn.classList.add("active");
+      document.querySelectorAll(".tab-content").forEach(tc => tc.classList.add("hidden"));
+  
+      const tabId = btn.dataset.tab;
+      document.getElementById(tabId).classList.remove("hidden");
+  
+      if (tabId === "scene1") {
+        updateScene1WithYears();
       }
-    });
-  }); 
-})();
+      if (tabId === "scene2") {
+        if (reviewsLoaded) {
+          updateScene2WithYears();
+        } else {
+          const checkLoaded = setInterval(() => {
+            if (reviewsLoaded) {
+              updateScene2WithYears();
+              clearInterval(checkLoaded);
+            }
+          }, 200);
+          }
+        }
+      });
+    }); 
+  })();
+
 
 
 
