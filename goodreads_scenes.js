@@ -530,8 +530,9 @@ function drawBubbleChart(data) {
     const filtered = state.allReviewsData.filter(d => 
       d.year >= state.startYear &&
       d.year <= state.endYear &&
+      state.selectedGenres.length > 0 &&
       state.selectedGenres.some(g => 
-        d.allGenres.toLowerCase().includes(g.toLowerCase())
+        d.allGenres && d.allGenres.toLowerCase().includes(g.toLowerCase())
       )
     );
   
@@ -705,6 +706,7 @@ function drawBubbleChart(data) {
     });
   });
 })();
+
 
 
 
