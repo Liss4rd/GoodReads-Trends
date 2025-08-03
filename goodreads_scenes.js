@@ -206,7 +206,7 @@
     }
 
     const x = d3.scaleLinear()
-      .domain([startYear, endYear])
+      .domain([state.startYear, state.endYear])
       .range([0, width]);
 
     const y = d3.scaleLinear()
@@ -443,6 +443,7 @@ document.querySelectorAll(".tab-button").forEach(btn => {
     }
   });
 })();
+
 
 
 
