@@ -243,7 +243,9 @@
       .nice()
       .range([height, 0]);
 
-    const color = state.genreColor;
+    const color = d3.scaleOrdinal()
+      .domain(topGenres)
+      .range(d3.schemeTableau10);
 
     // Axes + Labels
     svg.append("g")
@@ -639,6 +641,7 @@ function drawBubbleChart(data) {
       });
     }); 
   })();
+
 
 
 
