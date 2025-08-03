@@ -586,7 +586,7 @@ function drawScene3BarChart(data) {
       .attr("x", -55) // to left of bars
       .attr("y", d => y(d.rank) + 5)
       .attr("width", 40)
-      .attr("height", 40)
+      .attr("height", 55)
       .attr("preserveAspectRatio", "xMidYMid slice");
 
     const scene3Color = d3.scaleOrdinal()
@@ -710,6 +710,7 @@ function drawScene3BarChart(data) {
     });
   });
 })();
+
 
 
 
