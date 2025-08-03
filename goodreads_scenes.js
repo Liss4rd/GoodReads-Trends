@@ -403,7 +403,7 @@ function drawBubbleChart(data) {
     .range([0, width]);
 
   const y = d3.scaleLinear()
-    .domain([0, d3.max(data, d => d.review_count) || 1])
+    .domain([0, (d3.max(data, d => d.review_count) || 1) * 1.05])
     .range([height, 0]);
 
   const size = d3.scaleSqrt()
@@ -725,6 +725,7 @@ function drawScene3BarChart(data) {
     });
   });
 })();
+
 
 
 
