@@ -357,38 +357,54 @@ function updateScene2WithYears() {
 }
 
 function drawBubbleChart(data) {
-  const svg = d3.select("#chart2").append("svg")
-    .attr("width", 900)
-    .attr("height", 500);
+  // Remove old chart
+  d3.select("#chart2").selectAll("*").remove();
 
-  const width = +svg.attr("width");
-  const height = +svg.attr("height");
+  // Margins + dynamic sizing like Scene 1
   const margin = { top: 40, right: 40, bottom: 60, left: 60 };
+  const containerWidth = document.querySelector("#chart2").clientWidth;
+  const width = containerWidth * 0.8 - margin.left - margin.right;
+
+  const buffer = 10, bodyMargin = 32, targetHeight = 792;
+  const availableHeight = window.innerHeight
+    - document.querySelector("header").offsetHeight
+    - document.querySelector(".tab-container").offsetHeight
+    - buffer - margin.top - margin.bottom - bodyMargin - 200;
+
+  const height = Math.min(targetHeight, availableHeight);
+
+  // Match Scene 1 colors by genre
+  const color = d3.scaleOrdinal()
+    .domain([...new Set(state.allData.map(d => d.genre))])
+    .range(d3.schemeTableau10);
+
+  const svg = d3.select("#chart2").append("svg")
+    .attr("width", width + margin.left + margin.right)
+    .attr("height", height + margin.top + margin.bottom)
+    .append("g")
+    .attr("transform", `translate(${margin.left},${margin.top})`);
 
   const x = d3.scaleLinear()
     .domain([0, 5])
-    .range([margin.left, width - margin.right]);
+    .range([0, width]);
 
   const y = d3.scaleLinear()
     .domain([0, d3.max(data, d => d.review_count) || 1])
-    .range([height - margin.bottom, margin.top]);
+    .range([height, 0]);
 
   const size = d3.scaleSqrt()
     .domain([0, d3.max(data, d => d.fiveStarCount) || 1])
     .range([2, 40]);
 
-  const color = d3.scaleOrdinal()
-    .domain([...new Set(state.allData.map(d => d.genre))]) 
-    .range(d3.schemeTableau10);
-  
+  // Axes
   svg.append("g")
-    .attr("transform", `translate(0,${height - margin.bottom})`)
+    .attr("transform", `translate(0,${height})`)
     .call(d3.axisBottom(x));
 
   svg.append("g")
-    .attr("transform", `translate(${margin.left},0)`)
     .call(d3.axisLeft(y));
 
+  // Bubbles
   svg.selectAll("circle")
     .data(data)
     .join("circle")
@@ -399,6 +415,7 @@ function drawBubbleChart(data) {
     .attr("opacity", 0.7)
     .attr("stroke", "#333");
 
+  // Tooltip
   const tooltip = d3.select("body").append("div")
     .attr("class", "tooltip")
     .style("opacity", 0);
@@ -411,7 +428,7 @@ function drawBubbleChart(data) {
         Genre: ${d.genre}<br/>
         Avg Rating: ${d.average_rating}<br/>
         Reviews: ${d.review_count}<br/>
-        5* Ratings: ${d.fiveStarCount}
+        5★ Ratings: ${d.fiveStarCount}
       `)
       .style("left", `${event.pageX + 10}px`)
       .style("top", `${event.pageY - 28}px`);
@@ -452,6 +469,7 @@ document.querySelectorAll(".tab-button").forEach(btn => {
     });
   }); 
 })();
+
 
 
 
