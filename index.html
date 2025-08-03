@@ -40,15 +40,16 @@
 
 <!-- Scene 3 -->
 <div id="scene3" class="tab-content hidden">
-  <h2>Genre Exploration</h2>
+  <h2>Explore Best-Selling Books by Genre</h2>
   
   <!-- Genre selection -->
-  <div id="genreSelectContainer">
-  <select id="genreSelect"></select>
-  <div id="selectedGenresContainer"></div>
-  </div>
-  
-  <!-- Chart -->
+   <label for="genreSelect">Select Genre(s):</label>
+  <select id="genreSelect">
+    <!-- Options populated by JS -->
+  </select>
+
+  <div id="selectedGenresContainer" class="genre-chips"></div>
+
   <div id="chart3"></div>
   
   <!-- Popup -->
@@ -58,6 +59,7 @@
 <script src="goodreads_scenes.js" defer></script>
 </body>
 </html>
+
 
 
 
