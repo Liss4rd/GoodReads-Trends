@@ -555,7 +555,18 @@ function drawBubbleChart(data) {
       .style("font-size", "16px")
       .style("fill", "#000")
       .text("Number of Reviews");
-  
+
+    // Tooltip
+    const tooltip = d3.select("body").append("div")
+      .attr("class", "tooltip")
+      .style("opacity", 0)
+      .style("position", "absolute")
+      .style("background", "#fff")
+      .style("border", "1px solid #ccc")
+      .style("padding", "8px")
+      .style("border-radius", "4px")
+      .style("pointer-events", "none");
+    
     // Bubbles
     svg.selectAll("circle")
       .data(data)
@@ -566,27 +577,21 @@ function drawBubbleChart(data) {
       .attr("fill", d => state.genreColor(d.mainGenre))
       .attr("opacity", 0.7)
       .attr("stroke", "#333")
+      .on("mouseover", (event, d) => {
+        tooltip.transition().duration(200).style("opacity", 1);
+        tooltip.html(`<strong>${d.book_title || "Unknown Title"}</strong>`)
+          .style("left", `${event.pageX + 10}px`)
+          .style("top", `${event.pageY - 28}px`);
+      })
+      .on("mousemove", (event) => {
+        tooltip.style("left", `${event.pageX + 10}px`)
+               .style("top", `${event.pageY - 28}px`);
+      })
+      .on("mouseout", () => {
+        tooltip.transition().duration(200).style("opacity", 0);
+      })
       .on("click", (event, d) => showBookPopup(d));
-  
-    // Legend 
-    const legend = svg.selectAll(".legend")
-      .data([state.selectedGenre])
-      .join("g")
-      .attr("transform", (d, i) => `translate(${width + 10}, ${i * 20})`);
-  
-    legend.append("rect")
-      .attr("width", 14)
-      .attr("height", 14)
-      .attr("fill", d => state.genreColor(d));
-  
-    legend.append("text")
-      .attr("x", 20)
-      .attr("y", 7)
-      .attr("dy", "0.32em")
-      .style("font-size", "13px")
-      .text(d => d);
-  }
-  
+      
   // Popup for clicked book
   function showBookPopup(d) {
     const popup = d3.select("#bookPopup");
@@ -658,6 +663,7 @@ function drawBubbleChart(data) {
     });
   });
 })();
+
 
 
 
