@@ -20,14 +20,24 @@
         const match = d.publication_info.match(/\b(19|20)\d{2}\b/);
         if (match) year = +match[0];
       }
-  
+    
+      let fiveStarCount = 0;
+      if (d.rating_distribution) {
+        try {
+          const dist = JSON.parse(d.rating_distribution.replace(/'/g, '"'));
+          fiveStarCount = +((dist["5"] || "0").replace(/,/g, ""));
+        } catch (e) {
+          fiveStarCount = 0;
+        }
+      }
+    
       return {
         ...d,
         year: year || null,
         average_rating: +d.average_rating || 0,
-        review_count: +d.review_count || 0,
-        likes_on_review: +d.likes_on_review || 0,
-        genre: d.genre || "Other"
+        review_count: +((d.num_reviews || "").replace(/,/g, "")) || 0,
+        fiveStarCount: fiveStarCount,
+        genre: d.genres || "Other"
       };
     }).filter(d => d.year);
   
@@ -364,7 +374,7 @@ function drawBubbleChart(data) {
     .range([height - margin.bottom, margin.top]);
 
   const size = d3.scaleSqrt()
-    .domain([0, d3.max(data, d => d.likes_on_review) || 1])
+    .domain([0, d3.max(data, d => d.fiveStarCount) || 1])
     .range([2, 40]);
 
   const color = d3.scaleOrdinal(d3.schemeTableau10);
@@ -382,7 +392,7 @@ function drawBubbleChart(data) {
     .join("circle")
     .attr("cx", d => x(d.average_rating))
     .attr("cy", d => y(d.review_count))
-    .attr("r", d => size(d.likes_on_review))
+    .attr("r", d => size(d.fiveStarCount))
     .attr("fill", d => color(d.genre || "Other"))
     .attr("opacity", 0.7)
     .attr("stroke", "#333");
@@ -440,6 +450,7 @@ document.querySelectorAll(".tab-button").forEach(btn => {
     });
   }); 
 })();
+
 
 
 
