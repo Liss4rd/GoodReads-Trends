@@ -12,6 +12,7 @@ header {
 .tab-container {
   display: flex;
   gap: 1rem;
+  justify-content: center;
   margin-bottom: 1rem;
 }
 
@@ -209,6 +210,7 @@ p {
 .hidden {
   display: none;
 }
+
 
 
 
