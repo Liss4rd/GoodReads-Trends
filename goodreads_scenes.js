@@ -407,11 +407,11 @@ function drawBubbleChart(data) {
     .on("mouseover", (event, d) => {
       tooltip.transition().duration(200).style("opacity", 1);
       tooltip.html(`
-        <strong>${d.title || "Unknown Title"}</strong><br/>
+        <strong>${d.book_title || "Unknown Title"}</strong><br/>
         Genre: ${d.genre}<br/>
         Avg Rating: ${d.average_rating}<br/>
         Reviews: ${d.review_count}<br/>
-        Likes: ${d.likes_on_review}
+        5* Ratings: ${d.fiveStarCount}
       `)
       .style("left", `${event.pageX + 10}px`)
       .style("top", `${event.pageY - 28}px`);
@@ -452,6 +452,7 @@ document.querySelectorAll(".tab-button").forEach(btn => {
     });
   }); 
 })();
+
 
 
 
